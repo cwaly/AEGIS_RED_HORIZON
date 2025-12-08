@@ -1,0 +1,92 @@
+export enum ModuleCategory {
+  INTELLIGENCE = 'INTELIGENCIA & RECON',
+  BUG_BOUNTY = 'BUG BOUNTY HUNTING',
+  WEAPONIZATION = 'DESARROLLO DE RECURSOS',
+  WEB_HACKING = 'ATAQUES WEB & API',
+  INITIAL_ACCESS = 'ACCESO INICIAL',
+  POST_EXPLOITATION = 'POST-EXPLOTACIÓN & LATERAL',
+  REPORTING = 'REPORTING & EVIDENCIA'
+}
+
+export enum ModuleType {
+  // Intelligence
+  OSINT_GENERAL = 'OSINT_GENERAL',
+  SHODAN = 'SHODAN',
+  NMAP = 'NMAP',
+  WIRESHARK = 'WIRESHARK',
+  
+  // Bug Bounty
+  BUG_BOUNTY_RECON = 'BUG_BOUNTY_RECON',
+  BUG_BOUNTY_VULN = 'BUG_BOUNTY_VULN',
+
+  // Weaponization
+  PAYLOAD_GEN = 'PAYLOAD_GEN',
+  PHISHING_PREP = 'PHISHING_PREP',
+
+  // Web Hacking
+  BURP_CAIDO = 'BURP_CAIDO',
+  SQLMAP = 'SQLMAP',
+  WPSCAN = 'WPSCAN',
+  OWASP_ZAP = 'OWASP_ZAP',
+
+  // Initial Access
+  METASPLOIT = 'METASPLOIT',
+  HYDRA_HASHCAT = 'HYDRA_HASHCAT',
+  WIFI_ATTACKS = 'WIFI_ATTACKS',
+
+  // Post Exploitation
+  PRIV_ESC = 'PRIV_ESC',
+  ACTIVE_DIRECTORY = 'ACTIVE_DIRECTORY',
+  PERSISTENCE = 'PERSISTENCE',
+  
+  // Reporting
+  REPORT_GENERATOR = 'REPORT_GENERATOR'
+}
+
+export interface Tool {
+  id: ModuleType;
+  name: string;
+  description: string;
+  icon: string;
+  category: ModuleCategory;
+}
+
+export interface Message {
+  id: string;
+  role: 'user' | 'model' | 'system';
+  content: string;
+  timestamp: Date;
+  isCommand?: boolean;
+}
+
+export interface ApiKeys {
+  shodan?: string;
+  virusTotal?: string;
+  wpscan?: string;
+  openai?: string;
+}
+
+export interface UserProfile {
+  name: string;
+  initials: string;
+  role: string;
+}
+
+export type Language = 'es' | 'en';
+
+export interface AuditFinding {
+  severity: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW' | 'INFO';
+  title: string;
+  description: string;
+  remediation: string;
+}
+
+export interface AuditReport {
+  title: string;
+  target: string;
+  date: string;
+  auditor: string;
+  executiveSummary: string;
+  findings: AuditFinding[];
+  conclusion: string;
+}
