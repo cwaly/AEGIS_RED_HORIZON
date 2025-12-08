@@ -1,11 +1,31 @@
 
-import React, { useState } from 'react';
+import { useState, useEffect, FC, FormEvent } from 'react';
 import { ModuleType, Message, Tool, ModuleCategory, ApiKeys, UserProfile, Language, AuditReport } from './types';
 import { initializeChat, sendMessage, resetSession, generateReportData } from './services/geminiService';
 import { Terminal } from './components/Terminal';
 import { Logo } from './components/Logo';
 import { ReportModal } from './components/ReportModal';
-import { Terminal as TerminalIcon, Settings, FileText, Menu, X, ChevronDown, ChevronRight, Shield, Wifi, Globe, Database, Lock, Server, Eye, Zap, Cpu, Home, LogOut, Bug } from 'lucide-react';
+import { 
+  Terminal as TerminalIcon, 
+  Settings, 
+  FileText, 
+  Menu, 
+  X, 
+  ChevronDown, 
+  ChevronRight, 
+  Shield, 
+  Wifi, 
+  Globe, 
+  Database, 
+  Lock, 
+  Server, 
+  Eye, 
+  Zap, 
+  Cpu, 
+  Home, 
+  LogOut, 
+  Bug 
+} from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 
 const TOOLS_CONFIG: Tool[] = [
@@ -30,8 +50,33 @@ const TOOLS_CONFIG: Tool[] = [
   { id: ModuleType.REPORT_GENERATOR, name: 'Report Builder', description: 'Generar Informe Final', icon: 'FileText', category: ModuleCategory.REPORTING },
 ];
 
-const App: React.FC = () => {
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+const App: FC = () => {
+  // --- STATE INIT WITH LOCALSTORAGE PERSISTENCE ---
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(() => {
+    const saved = localStorage.getItem('aura_user_profile');
+    return saved ? JSON.parse(saved) : null;
+  });
+
+  const [apiKeys, setApiKeys] = useState<ApiKeys>(() => {
+    const saved = localStorage.getItem('aura_api_keys');
+    return saved ? JSON.parse(saved) : { shodan: '', virusTotal: '', wpscan: '', openai: '' };
+  });
+
+  // Persist Profile changes
+  useEffect(() => {
+    if (userProfile) {
+      localStorage.setItem('aura_user_profile', JSON.stringify(userProfile));
+    } else {
+      localStorage.removeItem('aura_user_profile');
+    }
+  }, [userProfile]);
+
+  // Persist API Key changes
+  useEffect(() => {
+    localStorage.setItem('aura_api_keys', JSON.stringify(apiKeys));
+  }, [apiKeys]);
+
+
   const [loginName, setLoginName] = useState('');
   const [currentView, setCurrentView] = useState<'dashboard' | 'module'>('dashboard');
   const [activeModule, setActiveModule] = useState<ModuleType>(ModuleType.NMAP);
@@ -41,8 +86,8 @@ const App: React.FC = () => {
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [apiKeys, setApiKeys] = useState<ApiKeys>({ shodan: '', virusTotal: '', wpscan: '', openai: '' });
   const [language, setLanguage] = useState<Language>('es');
+  
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({
     [ModuleCategory.INTELLIGENCE]: true,
     [ModuleCategory.BUG_BOUNTY]: false,
@@ -60,13 +105,21 @@ const App: React.FC = () => {
     return <Icon size={18} />;
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = (e: FormEvent) => {
     e.preventDefault();
     if (!loginName.trim()) return;
-    const parts = loginName.trim().split(' ');
+    
+    // Improved Initials Logic
+    const cleanName = loginName.trim().replace(/\s+/g, ' ');
+    const parts = cleanName.split(' ');
     let initials = parts[0][0];
-    if (parts.length > 1) initials += parts[parts.length - 1][0];
-    setUserProfile({ name: loginName, initials: initials.toUpperCase(), role: 'Senior Auditor' });
+    if (parts.length > 1) {
+        initials += parts[parts.length - 1][0];
+    } else if (cleanName.length > 1) {
+        initials += cleanName[1];
+    }
+    
+    setUserProfile({ name: cleanName, initials: initials.toUpperCase(), role: 'Senior Auditor' });
   };
 
   const handleModuleSelect = async (module: ModuleType) => {
@@ -81,7 +134,7 @@ const App: React.FC = () => {
       const response = await sendMessage(initialPrompt);
       addMessage(response, 'model');
     } catch (e) {
-      addMessage("Error crítico: Fallo en inicialización de IA.", 'system');
+      addMessage("Error crítico: Fallo en inicialización de IA. Verifique su API Key en .env", 'system');
     } finally {
       setIsLoading(false);
     }
@@ -98,7 +151,7 @@ const App: React.FC = () => {
       const response = await sendMessage(text);
       addMessage(response, 'model');
     } catch (e) {
-      addMessage("Error de conexión.", 'system');
+      addMessage("Error de conexión con el núcleo de IA.", 'system');
     } finally {
       setIsLoading(false);
     }
@@ -114,10 +167,10 @@ const App: React.FC = () => {
             setIsReportModalOpen(true);
             addMessage("Reporte generado exitosamente.", 'system');
         } else {
-            addMessage("Error generando reporte.", 'system');
+            addMessage("Error generando reporte: La IA no devolvió datos estructurados válidos.", 'system');
         }
     } catch (e) {
-        addMessage("Error generating report.", 'system');
+        addMessage("Error crítico al generar reporte.", 'system');
     } finally {
         setIsLoading(false);
     }
@@ -157,9 +210,9 @@ const App: React.FC = () => {
                 </div>
             </div>
             <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
-              <div><label className="block text-xs uppercase text-gray-500 mb-1">Shodan API Key</label><input type="password" className="w-full bg-black/50 border border-gray-700 p-2 rounded text-sm" value={apiKeys.shodan} onChange={(e) => setApiKeys({...apiKeys, shodan: e.target.value})} /></div>
-              <div><label className="block text-xs uppercase text-gray-500 mb-1">VirusTotal API Key</label><input type="password" className="w-full bg-black/50 border border-gray-700 p-2 rounded text-sm" value={apiKeys.virusTotal} onChange={(e) => setApiKeys({...apiKeys, virusTotal: e.target.value})} /></div>
-              <div><label className="block text-xs uppercase text-gray-500 mb-1">WPScan API Token</label><input type="password" className="w-full bg-black/50 border border-gray-700 p-2 rounded text-sm" value={apiKeys.wpscan} onChange={(e) => setApiKeys({...apiKeys, wpscan: e.target.value})} /></div>
+              <div><label className="block text-xs uppercase text-gray-500 mb-1">Shodan API Key</label><input type="password" className="w-full bg-black/50 border border-gray-700 p-2 rounded text-sm" value={apiKeys.shodan || ''} onChange={(e) => setApiKeys({...apiKeys, shodan: e.target.value})} /></div>
+              <div><label className="block text-xs uppercase text-gray-500 mb-1">VirusTotal API Key</label><input type="password" className="w-full bg-black/50 border border-gray-700 p-2 rounded text-sm" value={apiKeys.virusTotal || ''} onChange={(e) => setApiKeys({...apiKeys, virusTotal: e.target.value})} /></div>
+              <div><label className="block text-xs uppercase text-gray-500 mb-1">WPScan API Token</label><input type="password" className="w-full bg-black/50 border border-gray-700 p-2 rounded text-sm" value={apiKeys.wpscan || ''} onChange={(e) => setApiKeys({...apiKeys, wpscan: e.target.value})} /></div>
             </div>
             <div className="mt-6"><button onClick={() => setSettingsOpen(false)} className="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 rounded transition-colors">Save & Close</button></div>
           </div>
@@ -190,7 +243,7 @@ const App: React.FC = () => {
         <div className="p-4 bg-[#08080a] border-t border-gray-800 flex items-center gap-3">
            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-secondary to-primary flex items-center justify-center text-white font-bold text-lg shadow-lg">{userProfile.initials}</div>
            <div className="flex-1 overflow-hidden"><div className="text-sm font-bold text-white truncate">{userProfile.name}</div><div className="text-xs text-primary truncate">{userProfile.role}</div></div>
-           <button onClick={() => setUserProfile(null)} className="text-gray-500 hover:text-red-500 transition-colors"><LogOut size={16} /></button>
+           <button onClick={() => { setUserProfile(null); localStorage.removeItem('aura_user_profile'); }} className="text-gray-500 hover:text-red-500 transition-colors"><LogOut size={16} /></button>
         </div>
       </aside>
       <main className="flex-1 flex flex-col relative h-full bg-[#0a0a0c]">

@@ -1,4 +1,5 @@
-import React from 'react';
+
+import { FC } from 'react';
 import { AuditReport } from '../types';
 import { X, FileText, Download, Printer } from 'lucide-react';
 
@@ -7,7 +8,7 @@ interface ReportModalProps {
   onClose: () => void;
 }
 
-export const ReportModal: React.FC<ReportModalProps> = ({ report, onClose }) => {
+export const ReportModal: FC<ReportModalProps> = ({ report, onClose }) => {
 
   const generateHTML = () => {
     return `

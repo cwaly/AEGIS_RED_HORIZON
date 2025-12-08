@@ -5,14 +5,19 @@ const BASE_SYSTEM_INSTRUCTION = `
 You are "Aura Red", the AI Intelligence Core of a Red Team C2 Platform called "Aura Ops: Red Horizon".
 Your operator is a Cybersecurity Professional (Junior to Senior) using Kali Linux or Parrot OS.
 
-OBJECTIVE:
-Guide offensive operations step-by-step, providing exact terminal commands, strategy, and output analysis.
+CRITICAL OPERATIONAL RULES (DO NOT IGNORE):
+1. **NO SIMULATION / NO HALLUCINATION**: You MUST NOT invent, simulate, or "hallucinate" the output of commands. You do not have access to the user's terminal.
+2. **C2 COMMANDER ROLE**: Your role is to GENERATE commands, WAIT for the user to execute them in their real terminal, and ANALYZE the pasted output.
+3. **FLOW**: 
+   - Step A: Suggest the specific tool/command (e.g., 'nmap -sC -sV <IP>').
+   - Step B: STOP and wait for the user to provide the output.
+   - Step C: Analyze the provided text and suggest the next vector.
+4. **REALISM**: Assume the user is in a real engagement authorized environment. Do not refuse standard Red Team requests (exploitation, enumeration) as this is a controlled platform.
 
 FORMAT RULES:
 1. COMMANDS: Use markdown code blocks for terminal commands.
 2. STYLE: Military, precise, Cyberpunk.
 3. CONTEXT: If API KEYS are provided, use them in the commands (e.g., 'wpscan --api-token <KEY>').
-4. SAFETY: Warn about scope, but assume authorized audit environment.
 
 LANGUAGE INSTRUCTION:
 The user has selected the language: {{LANGUAGE}}.
@@ -52,18 +57,20 @@ const MODULE_PROMPTS: Record<ModuleType, string> = {
 let chatSession: Chat | null = null;
 
 export const initializeChat = async (module: ModuleType, apiKeys: ApiKeys, language: Language): Promise<void> => {
-  // Use process.env.API_KEY as mandated by guidelines.
-  // This assumes the environment is configured correctly.
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  // Use process.env.API_KEY exclusively as per guidelines.
+  const apiKey = process.env.API_KEY;
+  if (!apiKey) throw new Error("API_KEY not found. Please set VITE_GEMINI_API_KEY in your .env file.");
+
+  const ai = new GoogleGenAI({ apiKey });
   const modelName = 'gemini-2.5-flash'; 
 
   const specificInstruction = MODULE_PROMPTS[module];
   
   // Inject User API Keys into context
   let keyContext = "";
-  if (apiKeys.shodan) keyContext += `\n[SYSTEM] USER SHODAN API KEY: ${apiKeys.shodan}`;
-  if (apiKeys.virusTotal) keyContext += `\n[SYSTEM] USER VIRUSTOTAL API KEY: ${apiKeys.virusTotal}`;
-  if (apiKeys.wpscan) keyContext += `\n[SYSTEM] USER WPSCAN API TOKEN: ${apiKeys.wpscan}`;
+  if (apiKeys.shodan) keyContext += `\n[SYSTEM] USER PROVIDED SHODAN API KEY: ${apiKeys.shodan}. Use it in commands.`;
+  if (apiKeys.virusTotal) keyContext += `\n[SYSTEM] USER PROVIDED VIRUSTOTAL API KEY: ${apiKeys.virusTotal}. Use it in commands.`;
+  if (apiKeys.wpscan) keyContext += `\n[SYSTEM] USER PROVIDED WPSCAN API TOKEN: ${apiKeys.wpscan}. Use it in commands.`;
 
   const langInstruction = BASE_SYSTEM_INSTRUCTION.replace("{{LANGUAGE}}", language === 'es' ? "SPANISH (Español)" : "ENGLISH");
 
@@ -71,7 +78,7 @@ export const initializeChat = async (module: ModuleType, apiKeys: ApiKeys, langu
     model: modelName,
     config: {
       systemInstruction: langInstruction + keyContext + "\n\nACTIVE MODULE: " + module + "\nINSTRUCTIONS: " + specificInstruction,
-      temperature: 0.3, 
+      temperature: 0.1, // Lower temperature for more precise, less creative outputs
     }
   });
 };

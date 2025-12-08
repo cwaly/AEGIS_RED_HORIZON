@@ -1,6 +1,7 @@
-import React from 'react';
 
-export const Logo: React.FC<{ className?: string }> = ({ className = "w-10 h-10" }) => {
+import { FC } from 'react';
+
+export const Logo: FC<{ className?: string }> = ({ className = "w-10 h-10" }) => {
   return (
     <div className={`relative flex items-center justify-center ${className}`}>
         <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-[0_0_10px_rgba(239,68,68,0.5)]">

@@ -1,7 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
+
+import { useEffect, useRef, useState, KeyboardEvent, ReactNode, FC } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Message } from '../types';
-import { Send, Terminal as TerminalIcon, Copy, Check, FileText } from 'lucide-react';
+import { Send, Terminal as TerminalIcon, Copy, Check, FileText, AlertTriangle } from 'lucide-react';
 
 interface TerminalProps {
   messages: Message[];
@@ -11,7 +12,7 @@ interface TerminalProps {
   activeModule: string;
 }
 
-const CodeBlock = ({ children, className }: { children: any, className?: string }) => {
+const CodeBlock = ({ children, className }: { children: ReactNode, className?: string }) => {
     const [copied, setCopied] = useState(false);
     const textInput = String(children).replace(/\n$/, '');
 
@@ -44,7 +45,7 @@ const CodeBlock = ({ children, className }: { children: any, className?: string 
     );
 };
 
-export const Terminal: React.FC<TerminalProps> = ({ messages, onSendMessage, onGenerateReport, isLoading, activeModule }) => {
+export const Terminal: FC<TerminalProps> = ({ messages, onSendMessage, onGenerateReport, isLoading, activeModule }) => {
   const [input, setInput] = useState('');
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -52,7 +53,7 @@ export const Terminal: React.FC<TerminalProps> = ({ messages, onSendMessage, onG
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
@@ -134,6 +135,12 @@ export const Terminal: React.FC<TerminalProps> = ({ messages, onSendMessage, onG
         <div ref={bottomRef} />
       </div>
 
+      {/* Execution Warning Banner */}
+      <div className="bg-yellow-900/20 border-t border-yellow-900/50 px-4 py-1 text-[10px] text-yellow-500 flex items-center justify-center gap-2">
+        <AlertTriangle size={10} />
+        <span>EXECUTION MODE: Copy commands above -{'>'} Run in Kali Terminal -{'>'} Paste output below</span>
+      </div>
+
       <div className="p-4 bg-surface/80 border-t border-gray-800 backdrop-blur z-20">
         <div className="relative flex items-center">
             <span className="absolute left-3 text-primary font-bold">{'>'}</span>
@@ -142,7 +149,7 @@ export const Terminal: React.FC<TerminalProps> = ({ messages, onSendMessage, onG
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Ingrese comando, objetivo o pregunta..."
+            placeholder="Pegue aquí el output de su terminal..."
             className="w-full bg-[#0a0a0c] border border-gray-700 rounded-md py-3 pl-8 pr-12 text-gray-200 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary font-mono shadow-inner"
             autoFocus
             />
