@@ -19,8 +19,8 @@ Aura Ops es una suite de inteligencia C2 (Command & Control) diseñada para ejec
 ## 🛠️ Instalación (Paso a Paso)
 
 ### Requisitos previos
-*   Node.js (v18 o superior)
-*   Una API Key de Google Gemini (Gratis en AI Studio)
+*   Node.js (v18 o superior). Verifica con `node -v`.
+*   Una API Key de Google Gemini (Gratis en AI Studio).
 
 ### 1. Clonar el repositorio
 ```bash
@@ -46,8 +46,26 @@ npm run dev
 ```
 Accede a `http://localhost:1337` en tu navegador.
 
+## 🔧 Solución de Problemas (Troubleshooting)
+
+### Error: `sh: 1: vite: not found`
+Esto ocurre si la instalación se corrompió. Ejecuta estos comandos para arreglarlo:
+```bash
+rm -rf node_modules package-lock.json
+npm install
+npm run dev
+```
+
+### Error: `Node version warning`
+Asegúrate de tener Node.js versión 18 o superior.
+```bash
+node -v
+```
+Si es inferior, actualiza tu Kali: `sudo apt update && sudo apt install nodejs npm`.
+
 ## ⚠️ Disclaimer
 
 Esta herramienta ha sido creada únicamente con fines **educativos y de auditoría profesional autorizada**. El autor no se hace responsable del mal uso de esta plataforma.
 
 ---
+*Aura Ops // Red Horizon System v1.0*
