@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, Chat, GenerateContentResponse } from "@google/genai";
 import { ModuleType, ApiKeys, Language, AuditReport } from "../types";
 
@@ -29,6 +30,8 @@ If English (en): Respond entirely in English.
 const MODULE_PROMPTS: Record<ModuleType, string> = {
   [ModuleType.OSINT_GENERAL]: "Expert in OSINT. Tools: TheHarvester, Maltego, Google Dorks. Passive reconnaissance.",
   [ModuleType.SHODAN]: "Shodan Expert. Use 'shodan' CLI or 'curl'. Filter by port, org, country. Search for CVEs.",
+  [ModuleType.SHERLOCK]: "Username OSINT Expert. Tool: Sherlock. Guide on searching usernames across social networks to find targets. Analyze output for valid profiles.",
+  [ModuleType.SPIDERFOOT]: "OSINT Automation Expert. Tool: SpiderFoot (CLI/GUI). Guide on automated scanning of IP/Domain/Email/Name to gather intelligence.",
   [ModuleType.NMAP]: "Nmap/Masscan Master. Stealth scans, NSE scripts, firewall evasion. XML output analysis.",
   [ModuleType.WIRESHARK]: "Traffic Analyst. Wireshark, Tshark, Ettercap. Credential sniffing, protocol analysis.",
   
@@ -42,6 +45,8 @@ const MODULE_PROMPTS: Record<ModuleType, string> = {
   [ModuleType.MOBILE_DYNAMIC]: "Mobile Dynamic Analyst. Tools: Frida, Objection. Runtime hooking, SSL Pinning bypass, root detection bypass.",
 
   [ModuleType.PAYLOAD_GEN]: "Malware Dev. MSFVenom, Veil. AV Evasion (encoding, encryption).",
+  [ModuleType.COBALT_STRIKE]: "Cobalt Strike Commander. Guide on Malleable C2 profiles, Beacon generation (Stageless/Staged), Listener setup, and Lateral Movement (psexec_psh, wmi). Focus on OPSEC.",
+  [ModuleType.SLIVER_C2]: "Sliver C2 Expert. Open Source Red Team framework. Guide on generating implants (mtls, dns, wireguard), starting listeners, and post-exploitation (shell, execute-assembly).",
   [ModuleType.PHISHING_PREP]: "Social Engineering. GoPhish, SET. Email templates, landing page cloning.",
 
   [ModuleType.BURP_CAIDO]: "Web Proxy Expert. Burp Suite Pro / Caido. Request interception, repeater, intruder.",
@@ -50,11 +55,14 @@ const MODULE_PROMPTS: Record<ModuleType, string> = {
   [ModuleType.OWASP_ZAP]: "Web Scanner. OWASP ZAP automation, authenticated scans.",
 
   [ModuleType.METASPLOIT]: "Metasploit Commander. Exploits, payloads, sessions, pivoting, Armitage.",
+  [ModuleType.RESPONDER]: "LLMNR/NBT-NS Poisoning Expert. Tool: Responder. Guide on capturing NTLMv2 hashes in local networks. Analyze captured hashes for cracking.",
   [ModuleType.HYDRA_HASHCAT]: "Password Cracking. Hydra (online), Hashcat/John (offline). Hash identification.",
   [ModuleType.WIFI_ATTACKS]: "Wireless Auditor. Aircrack-ng suite. WPA2 Handshakes, Evil Twin.",
 
   [ModuleType.PRIV_ESC]: "Privilege Escalation. LinPEAS, WinPEAS, Kernel exploits, misconfigurations.",
-  [ModuleType.ACTIVE_DIRECTORY]: "AD Expert. BloodHound, Impacket, Kerberoasting, LLMNR Poisoning, Golden Ticket.",
+  [ModuleType.ACTIVE_DIRECTORY]: "AD Expert. BloodHound, Impacket. Domain enumeration, ACL analysis.",
+  [ModuleType.MIMIKATZ]: "Credential Dumping Expert. Tool: Mimikatz. Guide on sekurlsa::logonpasswords, lsadump::sam, lsadump::lsa /patch, kerberos::golden. Focus on Windows Credential Editor.",
+  [ModuleType.CRACKMAPEXEC]: "Network/AD Swiss Army Knife. Tool: CrackMapExec (or NetExec). Password spraying, SMB enumeration, Pass-the-Hash, exec commands on multiple hosts.",
   [ModuleType.PERSISTENCE]: "Persistence & Evasion. Registry keys, scheduled tasks, services, C2 agents.",
 
   [ModuleType.REPORT_GENERATOR]: "Reporting Officer. Structure findings into: Executive Summary, Technical Findings (CVSS), Evidence, Remediation."
@@ -62,28 +70,20 @@ const MODULE_PROMPTS: Record<ModuleType, string> = {
 
 let chatSession: Chat | null = null;
 
-// Helper function to check key existence without throwing
-export const checkApiKeyAvailability = (): boolean => {
+export const initializeChat = async (module: ModuleType, apiKeys: ApiKeys, language: Language): Promise<void> => {
+  // Robust API Key Retrieval: Try process.env first (via Vite define), then import.meta.env (Vite native)
   let apiKey = process.env.API_KEY;
+  
+  // Fallback for direct Vite usage if define failed
   if (!apiKey || apiKey === 'undefined') {
     apiKey = (import.meta as any).env?.VITE_GEMINI_API_KEY;
   }
-  return !!apiKey && apiKey.length > 10; // Basic length check
-};
 
-const getApiKey = (): string => {
-  let apiKey = process.env.API_KEY;
-  if (!apiKey || apiKey === 'undefined') {
-    apiKey = (import.meta as any).env?.VITE_GEMINI_API_KEY;
-  }
   if (!apiKey) {
+    console.error("FATAL: API Key is missing.");
     throw new Error("API_KEY not found. Ensure VITE_GEMINI_API_KEY is in .env and restart 'npm run dev'");
   }
-  return apiKey;
-};
 
-export const initializeChat = async (module: ModuleType, apiKeys: ApiKeys, language: Language): Promise<void> => {
-  const apiKey = getApiKey();
   const ai = new GoogleGenAI({ apiKey });
   const modelName = 'gemini-2.5-flash'; 
 

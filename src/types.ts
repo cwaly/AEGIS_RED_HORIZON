@@ -4,7 +4,7 @@ export enum ModuleCategory {
   BUG_BOUNTY = 'BUG BOUNTY HUNTING',
   CLOUD_SECURITY = 'CLOUD SECURITY (AWS/AZURE)',
   MOBILE_HACKING = 'MOBILE & APPS (ANDROID/iOS)',
-  WEAPONIZATION = 'DESARROLLO DE RECURSOS',
+  WEAPONIZATION = 'DESARROLLO DE RECURSOS & C2',
   WEB_HACKING = 'ATAQUES WEB & API',
   INITIAL_ACCESS = 'ACCESO INICIAL',
   POST_EXPLOITATION = 'POST-EXPLOTACIÓN & LATERAL',
@@ -17,6 +17,8 @@ export enum ModuleType {
   SHODAN = 'SHODAN',
   NMAP = 'NMAP',
   WIRESHARK = 'WIRESHARK',
+  SHERLOCK = 'SHERLOCK', // New
+  SPIDERFOOT = 'SPIDERFOOT', // New
   
   // Bug Bounty
   BUG_BOUNTY_RECON = 'BUG_BOUNTY_RECON',
@@ -33,6 +35,8 @@ export enum ModuleType {
   // Weaponization
   PAYLOAD_GEN = 'PAYLOAD_GEN',
   PHISHING_PREP = 'PHISHING_PREP',
+  COBALT_STRIKE = 'COBALT_STRIKE', // New
+  SLIVER_C2 = 'SLIVER_C2', // New
 
   // Web Hacking
   BURP_CAIDO = 'BURP_CAIDO',
@@ -44,10 +48,13 @@ export enum ModuleType {
   METASPLOIT = 'METASPLOIT',
   HYDRA_HASHCAT = 'HYDRA_HASHCAT',
   WIFI_ATTACKS = 'WIFI_ATTACKS',
+  RESPONDER = 'RESPONDER', // New
 
   // Post Exploitation
   PRIV_ESC = 'PRIV_ESC',
   ACTIVE_DIRECTORY = 'ACTIVE_DIRECTORY',
+  MIMIKATZ = 'MIMIKATZ', // New
+  CRACKMAPEXEC = 'CRACKMAPEXEC', // New (NetExec)
   PERSISTENCE = 'PERSISTENCE',
   
   // Reporting
@@ -81,6 +88,7 @@ export interface UserProfile {
   name: string;
   initials: string;
   role: string;
+  lastLogin?: string;
 }
 
 export type Language = 'es' | 'en';

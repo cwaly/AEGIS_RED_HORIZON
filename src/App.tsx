@@ -1,6 +1,7 @@
+
 import { useState, useEffect, FC, FormEvent } from 'react';
 import { ModuleType, Message, Tool, ModuleCategory, ApiKeys, UserProfile, Language, AuditReport } from './types';
-import { initializeChat, sendMessage, resetSession, generateReportData, checkApiKeyAvailability } from './services/geminiService';
+import { initializeChat, sendMessage, resetSession, generateReportData } from './services/geminiService';
 import { Terminal } from './components/Terminal';
 import { Logo } from './components/Logo';
 import { ReportModal } from './components/ReportModal';
@@ -26,48 +27,64 @@ import {
   Bug,
   Smartphone,
   Cloud,
-  AlertOctagon
+  Crosshair,
+  Search,
+  Key
 } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 
 const TOOLS_CONFIG: Tool[] = [
+  // Intel
   { id: ModuleType.NMAP, name: 'Nmap / Masscan', description: 'Mapeo de Red', icon: 'TerminalIcon', category: ModuleCategory.INTELLIGENCE },
   { id: ModuleType.SHODAN, name: 'Shodan API', description: 'Intel de Internet', icon: 'Globe', category: ModuleCategory.INTELLIGENCE },
+  { id: ModuleType.SHERLOCK, name: 'Sherlock', description: 'Búsqueda de Usuarios', icon: 'Search', category: ModuleCategory.INTELLIGENCE },
+  { id: ModuleType.SPIDERFOOT, name: 'SpiderFoot', description: 'OSINT Automatizado', icon: 'Eye', category: ModuleCategory.INTELLIGENCE },
   { id: ModuleType.OSINT_GENERAL, name: 'OSINT Suite', description: 'TheHarvester / Maltego', icon: 'Eye', category: ModuleCategory.INTELLIGENCE },
   { id: ModuleType.WIRESHARK, name: 'Sniffing', description: 'Wireshark / Ettercap', icon: 'Wifi', category: ModuleCategory.INTELLIGENCE },
   
+  // Bug Bounty
   { id: ModuleType.BUG_BOUNTY_RECON, name: 'Recon Masivo', description: 'Subfinder / Amass', icon: 'Globe', category: ModuleCategory.BUG_BOUNTY },
   { id: ModuleType.BUG_BOUNTY_VULN, name: 'Vuln Scanning', description: 'Nuclei / Jaeger', icon: 'Bug', category: ModuleCategory.BUG_BOUNTY },
 
+  // Cloud
   { id: ModuleType.CLOUD_AWS, name: 'AWS Audit', description: 'Pacu / ScoutSuite', icon: 'Cloud', category: ModuleCategory.CLOUD_SECURITY },
   { id: ModuleType.CLOUD_AZURE, name: 'Azure Audit', description: 'AzureHound / RoadTools', icon: 'Cloud', category: ModuleCategory.CLOUD_SECURITY },
 
+  // Mobile
   { id: ModuleType.MOBILE_STATIC, name: 'Static Analysis', description: 'MobSF / Jadx', icon: 'Smartphone', category: ModuleCategory.MOBILE_HACKING },
   { id: ModuleType.MOBILE_DYNAMIC, name: 'Dynamic Hook', description: 'Frida / Objection', icon: 'Smartphone', category: ModuleCategory.MOBILE_HACKING },
 
+  // Weaponization
+  { id: ModuleType.COBALT_STRIKE, name: 'Cobalt Strike', description: 'Advanced Red Team C2', icon: 'Crosshair', category: ModuleCategory.WEAPONIZATION },
+  { id: ModuleType.SLIVER_C2, name: 'Sliver C2', description: 'Open Source Implant Fwk', icon: 'Crosshair', category: ModuleCategory.WEAPONIZATION },
   { id: ModuleType.PAYLOAD_GEN, name: 'Payloads', description: 'MSFVenom / Veil', icon: 'Zap', category: ModuleCategory.WEAPONIZATION },
   { id: ModuleType.PHISHING_PREP, name: 'Phishing Ops', description: 'GoPhish / SET', icon: 'Users', category: ModuleCategory.WEAPONIZATION },
   
+  // Web
   { id: ModuleType.BURP_CAIDO, name: 'Burp / Caido', description: 'Proxies de Intercepción', icon: 'Globe', category: ModuleCategory.WEB_HACKING },
   { id: ModuleType.SQLMAP, name: 'SQL Injection', description: 'SQLMap Auto', icon: 'Database', category: ModuleCategory.WEB_HACKING },
   { id: ModuleType.WPSCAN, name: 'CMS Audit', description: 'WPScan / JoomScan', icon: 'FileText', category: ModuleCategory.WEB_HACKING },
   { id: ModuleType.OWASP_ZAP, name: 'Web Scanner', description: 'OWASP ZAP', icon: 'Shield', category: ModuleCategory.WEB_HACKING },
   
+  // Initial Access
   { id: ModuleType.METASPLOIT, name: 'Metasploit Fwk', description: 'Exploitation Core', icon: 'TerminalIcon', category: ModuleCategory.INITIAL_ACCESS },
+  { id: ModuleType.RESPONDER, name: 'Responder', description: 'LLMNR Poisoning', icon: 'Wifi', category: ModuleCategory.INITIAL_ACCESS },
   { id: ModuleType.HYDRA_HASHCAT, name: 'Cracking', description: 'Hydra / Hashcat', icon: 'Lock', category: ModuleCategory.INITIAL_ACCESS },
   { id: ModuleType.WIFI_ATTACKS, name: 'Wireless', description: 'Aircrack-ng Suite', icon: 'Wifi', category: ModuleCategory.INITIAL_ACCESS },
   
+  // Post Exploit
   { id: ModuleType.PRIV_ESC, name: 'PrivEsc', description: 'LinPEAS / WinPEAS', icon: 'Zap', category: ModuleCategory.POST_EXPLOITATION },
   { id: ModuleType.ACTIVE_DIRECTORY, name: 'Active Directory', description: 'Bloodhound / Impacket', icon: 'Server', category: ModuleCategory.POST_EXPLOITATION },
+  { id: ModuleType.CRACKMAPEXEC, name: 'CrackMapExec', description: 'NetExec / SMB Spray', icon: 'Server', category: ModuleCategory.POST_EXPLOITATION },
+  { id: ModuleType.MIMIKATZ, name: 'Mimikatz', description: 'Credential Dumping', icon: 'Key', category: ModuleCategory.POST_EXPLOITATION },
   { id: ModuleType.PERSISTENCE, name: 'Persistencia', description: 'Backdoors / C2', icon: 'Ghost', category: ModuleCategory.POST_EXPLOITATION },
   
+  // Reporting
   { id: ModuleType.REPORT_GENERATOR, name: 'Report Builder', description: 'Generar Informe Final', icon: 'FileText', category: ModuleCategory.REPORTING },
 ];
 
 const App: FC = () => {
-  // --- STATE INIT ---
-  const [systemReady, setSystemReady] = useState<boolean>(true); // Nuevo estado para verificar .env
-
+  // --- STATE INIT WITH LOCALSTORAGE PERSISTENCE ---
   const [userProfile, setUserProfile] = useState<UserProfile | null>(() => {
     const saved = localStorage.getItem('aura_user_profile');
     return saved ? JSON.parse(saved) : null;
@@ -77,6 +94,21 @@ const App: FC = () => {
     const saved = localStorage.getItem('aura_api_keys');
     return saved ? JSON.parse(saved) : { shodan: '', virusTotal: '', wpscan: '', openai: '' };
   });
+
+  // Persist Profile changes
+  useEffect(() => {
+    if (userProfile) {
+      localStorage.setItem('aura_user_profile', JSON.stringify(userProfile));
+    } else {
+      localStorage.removeItem('aura_user_profile');
+    }
+  }, [userProfile]);
+
+  // Persist API Key changes
+  useEffect(() => {
+    localStorage.setItem('aura_api_keys', JSON.stringify(apiKeys));
+  }, [apiKeys]);
+
 
   const [loginName, setLoginName] = useState('');
   const [currentView, setCurrentView] = useState<'dashboard' | 'module'>('dashboard');
@@ -101,30 +133,9 @@ const App: FC = () => {
     [ModuleCategory.REPORTING]: true,
   });
 
-  // Check API Key on Mount
-  useEffect(() => {
-    const isReady = checkApiKeyAvailability();
-    setSystemReady(isReady);
-  }, []);
-
-  // Persist Profile changes
-  useEffect(() => {
-    if (userProfile) {
-      localStorage.setItem('aura_user_profile', JSON.stringify(userProfile));
-    } else {
-      localStorage.removeItem('aura_user_profile');
-    }
-  }, [userProfile]);
-
-  // Persist API Key changes
-  useEffect(() => {
-    localStorage.setItem('aura_api_keys', JSON.stringify(apiKeys));
-  }, [apiKeys]);
-
-
   const toggleCategory = (cat: string) => setExpandedCategories(prev => ({...prev, [cat]: !prev[cat]}));
   const getIcon = (iconName: string) => {
-    const icons: any = { TerminalIcon, Globe, Eye, Wifi, Zap, Users: Shield, Database, FileText, Shield, Lock, Server, Ghost: Shield, Cpu, Bug, Smartphone, Cloud };
+    const icons: any = { TerminalIcon, Globe, Eye, Wifi, Zap, Users: Shield, Database, FileText, Shield, Lock, Server, Ghost: Shield, Cpu, Bug, Smartphone, Cloud, Crosshair, Search, Key };
     const Icon = icons[iconName] || TerminalIcon;
     return <Icon size={18} />;
   };
@@ -200,35 +211,6 @@ const App: FC = () => {
     }
   };
 
-  // --- SYSTEM HALTED SCREEN (Si falta la key) ---
-  if (!systemReady) {
-    return (
-      <div className="h-screen w-full bg-[#0a0000] flex items-center justify-center relative overflow-hidden font-mono text-red-500">
-        <div className="z-10 bg-black border border-red-900 p-8 rounded-lg shadow-[0_0_50px_rgba(255,0,0,0.3)] max-w-lg text-center">
-            <AlertOctagon size={64} className="mx-auto mb-6 text-red-600 animate-pulse" />
-            <h1 className="text-3xl font-bold mb-2">SYSTEM HALTED</h1>
-            <h2 className="text-sm tracking-[0.5em] mb-8 text-red-800">SECURITY PROTOCOL ENGAGED</h2>
-            
-            <div className="text-left bg-red-900/10 p-4 rounded border border-red-900/30 text-xs mb-6 space-y-2">
-                <p>CRITICAL ERROR: API Key Missing.</p>
-                <p>The system cannot initialize the Neural Core without a valid access token.</p>
-                <br/>
-                <p className="font-bold text-red-400">INSTRUCTIONS:</p>
-                <ol className="list-decimal pl-4 space-y-1 text-gray-400">
-                    <li>Create a file named <span className="text-white">.env</span> in the root folder.</li>
-                    <li>Add your key: <span className="text-white">VITE_GEMINI_API_KEY=AIzaSy...</span></li>
-                    <li>Restart the terminal: <span className="text-white">Ctrl+C</span> then <span className="text-white">npm run dev</span></li>
-                </ol>
-            </div>
-            <button onClick={() => window.location.reload()} className="bg-red-900/20 hover:bg-red-900/40 text-red-500 border border-red-900 px-6 py-2 rounded transition-colors uppercase text-xs tracking-widest">
-                Re-Scan System
-            </button>
-        </div>
-      </div>
-    );
-  }
-
-  // --- LOGIN SCREEN ---
   if (!userProfile) {
     return (
       <div className="h-screen w-full bg-[#0a0a0c] flex items-center justify-center relative overflow-hidden">
