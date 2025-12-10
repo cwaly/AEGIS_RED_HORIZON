@@ -1,4 +1,3 @@
-
 import { GoogleGenAI, Chat, GenerateContentResponse } from "@google/genai";
 import { ModuleType, ApiKeys, Language, AuditReport } from "../types";
 
@@ -63,20 +62,28 @@ const MODULE_PROMPTS: Record<ModuleType, string> = {
 
 let chatSession: Chat | null = null;
 
-export const initializeChat = async (module: ModuleType, apiKeys: ApiKeys, language: Language): Promise<void> => {
-  // Robust API Key Retrieval: Try process.env first (via Vite define), then import.meta.env (Vite native)
+// Helper function to check key existence without throwing
+export const checkApiKeyAvailability = (): boolean => {
   let apiKey = process.env.API_KEY;
-  
-  // Fallback for direct Vite usage if define failed
   if (!apiKey || apiKey === 'undefined') {
     apiKey = (import.meta as any).env?.VITE_GEMINI_API_KEY;
   }
+  return !!apiKey && apiKey.length > 10; // Basic length check
+};
 
+const getApiKey = (): string => {
+  let apiKey = process.env.API_KEY;
+  if (!apiKey || apiKey === 'undefined') {
+    apiKey = (import.meta as any).env?.VITE_GEMINI_API_KEY;
+  }
   if (!apiKey) {
-    console.error("FATAL: API Key is missing.");
     throw new Error("API_KEY not found. Ensure VITE_GEMINI_API_KEY is in .env and restart 'npm run dev'");
   }
+  return apiKey;
+};
 
+export const initializeChat = async (module: ModuleType, apiKeys: ApiKeys, language: Language): Promise<void> => {
+  const apiKey = getApiKey();
   const ai = new GoogleGenAI({ apiKey });
   const modelName = 'gemini-2.5-flash'; 
 

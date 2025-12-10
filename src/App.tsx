@@ -1,7 +1,6 @@
-
 import { useState, useEffect, FC, FormEvent } from 'react';
 import { ModuleType, Message, Tool, ModuleCategory, ApiKeys, UserProfile, Language, AuditReport } from './types';
-import { initializeChat, sendMessage, resetSession, generateReportData } from './services/geminiService';
+import { initializeChat, sendMessage, resetSession, generateReportData, checkApiKeyAvailability } from './services/geminiService';
 import { Terminal } from './components/Terminal';
 import { Logo } from './components/Logo';
 import { ReportModal } from './components/ReportModal';
@@ -26,7 +25,8 @@ import {
   LogOut, 
   Bug,
   Smartphone,
-  Cloud
+  Cloud,
+  AlertOctagon
 } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -65,7 +65,9 @@ const TOOLS_CONFIG: Tool[] = [
 ];
 
 const App: FC = () => {
-  // --- STATE INIT WITH LOCALSTORAGE PERSISTENCE ---
+  // --- STATE INIT ---
+  const [systemReady, setSystemReady] = useState<boolean>(true); // Nuevo estado para verificar .env
+
   const [userProfile, setUserProfile] = useState<UserProfile | null>(() => {
     const saved = localStorage.getItem('aura_user_profile');
     return saved ? JSON.parse(saved) : null;
@@ -75,21 +77,6 @@ const App: FC = () => {
     const saved = localStorage.getItem('aura_api_keys');
     return saved ? JSON.parse(saved) : { shodan: '', virusTotal: '', wpscan: '', openai: '' };
   });
-
-  // Persist Profile changes
-  useEffect(() => {
-    if (userProfile) {
-      localStorage.setItem('aura_user_profile', JSON.stringify(userProfile));
-    } else {
-      localStorage.removeItem('aura_user_profile');
-    }
-  }, [userProfile]);
-
-  // Persist API Key changes
-  useEffect(() => {
-    localStorage.setItem('aura_api_keys', JSON.stringify(apiKeys));
-  }, [apiKeys]);
-
 
   const [loginName, setLoginName] = useState('');
   const [currentView, setCurrentView] = useState<'dashboard' | 'module'>('dashboard');
@@ -113,6 +100,27 @@ const App: FC = () => {
     [ModuleCategory.POST_EXPLOITATION]: false,
     [ModuleCategory.REPORTING]: true,
   });
+
+  // Check API Key on Mount
+  useEffect(() => {
+    const isReady = checkApiKeyAvailability();
+    setSystemReady(isReady);
+  }, []);
+
+  // Persist Profile changes
+  useEffect(() => {
+    if (userProfile) {
+      localStorage.setItem('aura_user_profile', JSON.stringify(userProfile));
+    } else {
+      localStorage.removeItem('aura_user_profile');
+    }
+  }, [userProfile]);
+
+  // Persist API Key changes
+  useEffect(() => {
+    localStorage.setItem('aura_api_keys', JSON.stringify(apiKeys));
+  }, [apiKeys]);
+
 
   const toggleCategory = (cat: string) => setExpandedCategories(prev => ({...prev, [cat]: !prev[cat]}));
   const getIcon = (iconName: string) => {
@@ -192,6 +200,35 @@ const App: FC = () => {
     }
   };
 
+  // --- SYSTEM HALTED SCREEN (Si falta la key) ---
+  if (!systemReady) {
+    return (
+      <div className="h-screen w-full bg-[#0a0000] flex items-center justify-center relative overflow-hidden font-mono text-red-500">
+        <div className="z-10 bg-black border border-red-900 p-8 rounded-lg shadow-[0_0_50px_rgba(255,0,0,0.3)] max-w-lg text-center">
+            <AlertOctagon size={64} className="mx-auto mb-6 text-red-600 animate-pulse" />
+            <h1 className="text-3xl font-bold mb-2">SYSTEM HALTED</h1>
+            <h2 className="text-sm tracking-[0.5em] mb-8 text-red-800">SECURITY PROTOCOL ENGAGED</h2>
+            
+            <div className="text-left bg-red-900/10 p-4 rounded border border-red-900/30 text-xs mb-6 space-y-2">
+                <p>CRITICAL ERROR: API Key Missing.</p>
+                <p>The system cannot initialize the Neural Core without a valid access token.</p>
+                <br/>
+                <p className="font-bold text-red-400">INSTRUCTIONS:</p>
+                <ol className="list-decimal pl-4 space-y-1 text-gray-400">
+                    <li>Create a file named <span className="text-white">.env</span> in the root folder.</li>
+                    <li>Add your key: <span className="text-white">VITE_GEMINI_API_KEY=AIzaSy...</span></li>
+                    <li>Restart the terminal: <span className="text-white">Ctrl+C</span> then <span className="text-white">npm run dev</span></li>
+                </ol>
+            </div>
+            <button onClick={() => window.location.reload()} className="bg-red-900/20 hover:bg-red-900/40 text-red-500 border border-red-900 px-6 py-2 rounded transition-colors uppercase text-xs tracking-widest">
+                Re-Scan System
+            </button>
+        </div>
+      </div>
+    );
+  }
+
+  // --- LOGIN SCREEN ---
   if (!userProfile) {
     return (
       <div className="h-screen w-full bg-[#0a0a0c] flex items-center justify-center relative overflow-hidden">
