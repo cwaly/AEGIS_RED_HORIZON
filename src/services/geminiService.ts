@@ -53,11 +53,17 @@ const MODULE_PROMPTS: Record<ModuleType, string> = {
   [ModuleType.SQLMAP]: "SQL Injection Expert. SQLMap advanced usage: --dbs, --os-shell, WAF bypass (--tamper).",
   [ModuleType.WPSCAN]: "CMS Auditor. WPScan. Enumerate users, plugins, themes. Use API Token if available for vulnerability data.",
   [ModuleType.OWASP_ZAP]: "Web Scanner. OWASP ZAP automation, authenticated scans.",
+  [ModuleType.NIKTO]: "Web Server Scanner Expert. Tool: Nikto. Guide on scanning for outdated server software, CGI vulnerabilities, and dangerous files. Analyze output for quick wins.",
+  [ModuleType.GOBUSTER_FFUF]: "Web Fuzzing Expert. Tools: Gobuster, Ffuf, Dirb. Guide on directory/file brute-forcing, vhost discovery, and parameter fuzzing. Recommend wordlists (SecLists).",
+  [ModuleType.COMMIX]: "Command Injection Expert. Tool: Commix. Automating the detection and exploitation of OS Command Injection vulnerabilities.",
 
   [ModuleType.METASPLOIT]: "Metasploit Commander. Exploits, payloads, sessions, pivoting, Armitage.",
   [ModuleType.RESPONDER]: "LLMNR/NBT-NS Poisoning Expert. Tool: Responder. Guide on capturing NTLMv2 hashes in local networks. Analyze captured hashes for cracking.",
   [ModuleType.HYDRA_HASHCAT]: "Password Cracking. Hydra (online), Hashcat/John (offline). Hash identification.",
-  [ModuleType.WIFI_ATTACKS]: "Wireless Auditor. Aircrack-ng suite. WPA2 Handshakes, Evil Twin.",
+  [ModuleType.WIFI_ATTACKS]: "Wireless Auditor (Manual). Aircrack-ng suite. Monitor mode, Deauth attacks, WPA Handshake capture, IVs for WEP.",
+  [ModuleType.WIFITE]: "Automated Wireless Auditor. Tool: Wifite2. Guide on automated attack chains: WPS Pixie-Dust, PMKID capture, WPA Handshake capture. 'Set and forget' audit.",
+  [ModuleType.BETTERCAP]: "Network/WiFi Swiss Army Knife. Tool: Bettercap. Guide on WiFi monitoring, BLE (Bluetooth Low Energy) attacks, and complex MITM scenarios (arp.spoof, dns.spoof).",
+  [ModuleType.KISMET]: "Wireless Sniffer. Tool: Kismet. Passive wireless network detector, sniffer, and intrusion detection system. Mapping wifi/bluetooth devices without transmitting.",
 
   [ModuleType.PRIV_ESC]: "Privilege Escalation. LinPEAS, WinPEAS, Kernel exploits, misconfigurations.",
   [ModuleType.ACTIVE_DIRECTORY]: "AD Expert. BloodHound, Impacket. Domain enumeration, ACL analysis.",

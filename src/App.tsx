@@ -29,7 +29,9 @@ import {
   Cloud,
   Crosshair,
   Search,
-  Key
+  Key,
+  Radio,
+  List
 } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -62,7 +64,10 @@ const TOOLS_CONFIG: Tool[] = [
   
   // Web
   { id: ModuleType.BURP_CAIDO, name: 'Burp / Caido', description: 'Proxies de Intercepción', icon: 'Globe', category: ModuleCategory.WEB_HACKING },
+  { id: ModuleType.NIKTO, name: 'Nikto', description: 'Scanner Web Server', icon: 'List', category: ModuleCategory.WEB_HACKING },
+  { id: ModuleType.GOBUSTER_FFUF, name: 'Gobuster / Ffuf', description: 'Fuzzing & Dirbuster', icon: 'List', category: ModuleCategory.WEB_HACKING },
   { id: ModuleType.SQLMAP, name: 'SQL Injection', description: 'SQLMap Auto', icon: 'Database', category: ModuleCategory.WEB_HACKING },
+  { id: ModuleType.COMMIX, name: 'Commix', description: 'Command Injection', icon: 'TerminalIcon', category: ModuleCategory.WEB_HACKING },
   { id: ModuleType.WPSCAN, name: 'CMS Audit', description: 'WPScan / JoomScan', icon: 'FileText', category: ModuleCategory.WEB_HACKING },
   { id: ModuleType.OWASP_ZAP, name: 'Web Scanner', description: 'OWASP ZAP', icon: 'Shield', category: ModuleCategory.WEB_HACKING },
   
@@ -70,7 +75,10 @@ const TOOLS_CONFIG: Tool[] = [
   { id: ModuleType.METASPLOIT, name: 'Metasploit Fwk', description: 'Exploitation Core', icon: 'TerminalIcon', category: ModuleCategory.INITIAL_ACCESS },
   { id: ModuleType.RESPONDER, name: 'Responder', description: 'LLMNR Poisoning', icon: 'Wifi', category: ModuleCategory.INITIAL_ACCESS },
   { id: ModuleType.HYDRA_HASHCAT, name: 'Cracking', description: 'Hydra / Hashcat', icon: 'Lock', category: ModuleCategory.INITIAL_ACCESS },
-  { id: ModuleType.WIFI_ATTACKS, name: 'Wireless', description: 'Aircrack-ng Suite', icon: 'Wifi', category: ModuleCategory.INITIAL_ACCESS },
+  { id: ModuleType.WIFITE, name: 'Wifite 2', description: 'Auto-Wifi Audit', icon: 'Radio', category: ModuleCategory.INITIAL_ACCESS },
+  { id: ModuleType.BETTERCAP, name: 'Bettercap', description: 'MITM / BLE / Wifi', icon: 'Radio', category: ModuleCategory.INITIAL_ACCESS },
+  { id: ModuleType.KISMET, name: 'Kismet', description: 'Wireless Sniffer', icon: 'Radio', category: ModuleCategory.INITIAL_ACCESS },
+  { id: ModuleType.WIFI_ATTACKS, name: 'Aircrack-ng', description: 'Suite Manual', icon: 'Wifi', category: ModuleCategory.INITIAL_ACCESS },
   
   // Post Exploit
   { id: ModuleType.PRIV_ESC, name: 'PrivEsc', description: 'LinPEAS / WinPEAS', icon: 'Zap', category: ModuleCategory.POST_EXPLOITATION },
@@ -135,7 +143,7 @@ const App: FC = () => {
 
   const toggleCategory = (cat: string) => setExpandedCategories(prev => ({...prev, [cat]: !prev[cat]}));
   const getIcon = (iconName: string) => {
-    const icons: any = { TerminalIcon, Globe, Eye, Wifi, Zap, Users: Shield, Database, FileText, Shield, Lock, Server, Ghost: Shield, Cpu, Bug, Smartphone, Cloud, Crosshair, Search, Key };
+    const icons: any = { TerminalIcon, Globe, Eye, Wifi, Zap, Users: Shield, Database, FileText, Shield, Lock, Server, Ghost: Shield, Cpu, Bug, Smartphone, Cloud, Crosshair, Search, Key, Radio, List };
     const Icon = icons[iconName] || TerminalIcon;
     return <Icon size={18} />;
   };
