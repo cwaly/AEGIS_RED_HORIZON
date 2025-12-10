@@ -64,9 +64,18 @@ const MODULE_PROMPTS: Record<ModuleType, string> = {
 let chatSession: Chat | null = null;
 
 export const initializeChat = async (module: ModuleType, apiKeys: ApiKeys, language: Language): Promise<void> => {
-  // Use process.env.API_KEY exclusively as per guidelines.
-  const apiKey = process.env.API_KEY;
-  if (!apiKey) throw new Error("API_KEY not found. Please set VITE_GEMINI_API_KEY in your .env file.");
+  // Robust API Key Retrieval: Try process.env first (via Vite define), then import.meta.env (Vite native)
+  let apiKey = process.env.API_KEY;
+  
+  // Fallback for direct Vite usage if define failed
+  if (!apiKey || apiKey === 'undefined') {
+    apiKey = (import.meta as any).env?.VITE_GEMINI_API_KEY;
+  }
+
+  if (!apiKey) {
+    console.error("FATAL: API Key is missing.");
+    throw new Error("API_KEY not found. Ensure VITE_GEMINI_API_KEY is in .env and restart 'npm run dev'");
+  }
 
   const ai = new GoogleGenAI({ apiKey });
   const modelName = 'gemini-2.5-flash'; 
@@ -85,7 +94,7 @@ export const initializeChat = async (module: ModuleType, apiKeys: ApiKeys, langu
     model: modelName,
     config: {
       systemInstruction: langInstruction + keyContext + "\n\nACTIVE MODULE: " + module + "\nINSTRUCTIONS: " + specificInstruction,
-      temperature: 0.1, // Lower temperature for more precise, less creative outputs
+      temperature: 0.1, 
     }
   });
 };
@@ -97,7 +106,7 @@ export const sendMessage = async (text: string): Promise<string> => {
     return response.text || "Error: No response from AI Core.";
   } catch (error) {
     console.error("Gemini API Error:", error);
-    return "Error: Neural Link Severed. Check Console.";
+    return "Error: Neural Link Severed. Check Console for API Key issues.";
   }
 };
 
