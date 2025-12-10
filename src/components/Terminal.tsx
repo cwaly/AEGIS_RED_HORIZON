@@ -86,11 +86,6 @@ export const Terminal: FC<TerminalProps> = ({ messages, onSendMessage, onGenerat
                 <FileText size={14} />
                 <span>GENERAR REPORTE</span>
              </button>
-            <div className="flex gap-2">
-                <span className="h-3 w-3 rounded-full bg-red-500/20 border border-red-500"></span>
-                <span className="h-3 w-3 rounded-full bg-yellow-500/20 border border-yellow-500"></span>
-                <span className="h-3 w-3 rounded-full bg-green-500/20 border border-green-500"></span>
-            </div>
         </div>
       </div>
 

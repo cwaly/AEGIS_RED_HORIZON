@@ -24,7 +24,9 @@ import {
   Cpu, 
   Home, 
   LogOut, 
-  Bug 
+  Bug,
+  Smartphone,
+  Cloud
 } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -33,20 +35,32 @@ const TOOLS_CONFIG: Tool[] = [
   { id: ModuleType.SHODAN, name: 'Shodan API', description: 'Intel de Internet', icon: 'Globe', category: ModuleCategory.INTELLIGENCE },
   { id: ModuleType.OSINT_GENERAL, name: 'OSINT Suite', description: 'TheHarvester / Maltego', icon: 'Eye', category: ModuleCategory.INTELLIGENCE },
   { id: ModuleType.WIRESHARK, name: 'Sniffing', description: 'Wireshark / Ettercap', icon: 'Wifi', category: ModuleCategory.INTELLIGENCE },
+  
   { id: ModuleType.BUG_BOUNTY_RECON, name: 'Recon Masivo', description: 'Subfinder / Amass', icon: 'Globe', category: ModuleCategory.BUG_BOUNTY },
   { id: ModuleType.BUG_BOUNTY_VULN, name: 'Vuln Scanning', description: 'Nuclei / Jaeger', icon: 'Bug', category: ModuleCategory.BUG_BOUNTY },
+
+  { id: ModuleType.CLOUD_AWS, name: 'AWS Audit', description: 'Pacu / ScoutSuite', icon: 'Cloud', category: ModuleCategory.CLOUD_SECURITY },
+  { id: ModuleType.CLOUD_AZURE, name: 'Azure Audit', description: 'AzureHound / RoadTools', icon: 'Cloud', category: ModuleCategory.CLOUD_SECURITY },
+
+  { id: ModuleType.MOBILE_STATIC, name: 'Static Analysis', description: 'MobSF / Jadx', icon: 'Smartphone', category: ModuleCategory.MOBILE_HACKING },
+  { id: ModuleType.MOBILE_DYNAMIC, name: 'Dynamic Hook', description: 'Frida / Objection', icon: 'Smartphone', category: ModuleCategory.MOBILE_HACKING },
+
   { id: ModuleType.PAYLOAD_GEN, name: 'Payloads', description: 'MSFVenom / Veil', icon: 'Zap', category: ModuleCategory.WEAPONIZATION },
   { id: ModuleType.PHISHING_PREP, name: 'Phishing Ops', description: 'GoPhish / SET', icon: 'Users', category: ModuleCategory.WEAPONIZATION },
+  
   { id: ModuleType.BURP_CAIDO, name: 'Burp / Caido', description: 'Proxies de Intercepción', icon: 'Globe', category: ModuleCategory.WEB_HACKING },
   { id: ModuleType.SQLMAP, name: 'SQL Injection', description: 'SQLMap Auto', icon: 'Database', category: ModuleCategory.WEB_HACKING },
   { id: ModuleType.WPSCAN, name: 'CMS Audit', description: 'WPScan / JoomScan', icon: 'FileText', category: ModuleCategory.WEB_HACKING },
   { id: ModuleType.OWASP_ZAP, name: 'Web Scanner', description: 'OWASP ZAP', icon: 'Shield', category: ModuleCategory.WEB_HACKING },
+  
   { id: ModuleType.METASPLOIT, name: 'Metasploit Fwk', description: 'Exploitation Core', icon: 'TerminalIcon', category: ModuleCategory.INITIAL_ACCESS },
   { id: ModuleType.HYDRA_HASHCAT, name: 'Cracking', description: 'Hydra / Hashcat', icon: 'Lock', category: ModuleCategory.INITIAL_ACCESS },
   { id: ModuleType.WIFI_ATTACKS, name: 'Wireless', description: 'Aircrack-ng Suite', icon: 'Wifi', category: ModuleCategory.INITIAL_ACCESS },
+  
   { id: ModuleType.PRIV_ESC, name: 'PrivEsc', description: 'LinPEAS / WinPEAS', icon: 'Zap', category: ModuleCategory.POST_EXPLOITATION },
   { id: ModuleType.ACTIVE_DIRECTORY, name: 'Active Directory', description: 'Bloodhound / Impacket', icon: 'Server', category: ModuleCategory.POST_EXPLOITATION },
   { id: ModuleType.PERSISTENCE, name: 'Persistencia', description: 'Backdoors / C2', icon: 'Ghost', category: ModuleCategory.POST_EXPLOITATION },
+  
   { id: ModuleType.REPORT_GENERATOR, name: 'Report Builder', description: 'Generar Informe Final', icon: 'FileText', category: ModuleCategory.REPORTING },
 ];
 
@@ -91,6 +105,8 @@ const App: FC = () => {
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({
     [ModuleCategory.INTELLIGENCE]: true,
     [ModuleCategory.BUG_BOUNTY]: false,
+    [ModuleCategory.CLOUD_SECURITY]: false,
+    [ModuleCategory.MOBILE_HACKING]: false,
     [ModuleCategory.WEAPONIZATION]: false,
     [ModuleCategory.WEB_HACKING]: false,
     [ModuleCategory.INITIAL_ACCESS]: false,
@@ -100,7 +116,7 @@ const App: FC = () => {
 
   const toggleCategory = (cat: string) => setExpandedCategories(prev => ({...prev, [cat]: !prev[cat]}));
   const getIcon = (iconName: string) => {
-    const icons: any = { TerminalIcon, Globe, Eye, Wifi, Zap, Users: Shield, Database, FileText, Shield, Lock, Server, Ghost: Shield, Cpu, Bug };
+    const icons: any = { TerminalIcon, Globe, Eye, Wifi, Zap, Users: Shield, Database, FileText, Shield, Lock, Server, Ghost: Shield, Cpu, Bug, Smartphone, Cloud };
     const Icon = icons[iconName] || TerminalIcon;
     return <Icon size={18} />;
   };

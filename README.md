@@ -1,71 +1,78 @@
+
 # 🛡️ Aura Ops: Red Horizon
 
 **Plataforma de Operaciones de Red Team Asistida por IA**
 
 > *Created by César Matute - Senior Auditor*
 
-Aura Ops es una suite de inteligencia C2 (Command & Control) diseñada para ejecutarse en entornos de auditoría ofensiva (Kali Linux, Parrot OS). Actúa como un "Head-Up Display" táctico que guía al auditor paso a paso utilizando el motor **Google Gemini 2.5 Flash**, integrando herramientas de reconocimiento, explotación y generación de reportes.
+Aura Ops es una suite de inteligencia C2 (Command & Control) diseñada para ejecutarse de forma segura en **Cualquier Sistema Operativo** (Windows, Linux, Docker, macOS). Actúa como un "Head-Up Display" táctico que guía al auditor paso a paso utilizando el motor **Google Gemini 2.5 Flash**, integrando herramientas de reconocimiento, explotación, nube y móvil.
 
-![Status](https://img.shields.io/badge/Status-Operational-green) ![Platform](https://img.shields.io/badge/Platform-Kali%20%2F%20Parrot-black) ![AI](https://img.shields.io/badge/AI-Gemini%20Pro-blue)
+![Status](https://img.shields.io/badge/Status-Operational-green) ![Platform](https://img.shields.io/badge/Platform-Cross--Platform-black) ![AI](https://img.shields.io/badge/AI-Gemini%20Pro-blue)
 
 ## ⚡ Características Principales
 
-*   **🧠 IA Táctica**: Comandos guiados para Nmap, Metasploit, Wireshark, etc.
-*   **🕷️ Bug Bounty Mode**: Módulos para Recon masivo (Subfinder, Amass) y escaneo (Nuclei).
-*   **📂 Reportes Automáticos**: Generación de informes en HTML/Word/PDF con un clic.
-*   **🔌 Integración API**: Panel de configuración para Shodan, VirusTotal y WPScan.
-*   **🔒 Modo Offline**: Interfaz optimizada para operar sin dependencias CDN externas.
+*   **🧠 IA Táctica**: Guía para Nmap, Metasploit, Wireshark, etc.
+*   **☁️ Cloud & Mobile**: Módulos para AWS/Azure y Android/iOS Hacking.
+*   **🕷️ Bug Bounty**: Módulos para Recon masivo (Subfinder, Amass).
+*   **📂 Reportes Automáticos**: HTML/Word/PDF con un clic.
+*   **🔌 Integración API**: Shodan, VirusTotal, WPScan.
+*   **🔒 Arquitectura C2**: Separa la inteligencia (Aura Ops) de la ejecución (Kali Linux).
 
-## 🛠️ Instalación (Paso a Paso)
+## 🛠️ Instalación (Elige tu Sistema)
 
-### Requisitos previos
-*   Node.js (v18 o superior). Verifica con `node -v`.
-*   Una API Key de Google Gemini (Gratis en AI Studio).
+### Opción A: Kali Linux / Linux (Nativo)
 
-### 1. Clonar el repositorio
-```bash
-git clone https://github.com/cwaly/aura-ops.git
-cd aura-ops
-```
+1.  **Clonar:**
+    ```bash
+    git clone https://github.com/cwaly/aura-ops.git
+    cd aura-ops
+    ```
+2.  **Configurar Clave (.env):**
+    Crea un archivo `.env` y añade: `VITE_GEMINI_API_KEY=tu_clave_aqui`
+3.  **Instalar y Correr:**
+    ```bash
+    npm install
+    npm run dev
+    ```
 
-### 2. Configurar la Llave Maestra
-Crea un archivo llamado `.env` en la raíz del proyecto y añade tu clave:
+### Opción B: Windows (PowerShell)
 
-```env
-VITE_GEMINI_API_KEY=tu_clave_secreta_aqui
-```
+1.  Instala **Node.js** desde [nodejs.org](https://nodejs.org).
+2.  Abre PowerShell y clona el repo (o descárgalo como ZIP).
+    ```powershell
+    git clone https://github.com/cwaly/aura-ops.git
+    cd aura-ops
+    ```
+3.  Crea el archivo `.env` en la carpeta raíz con tu clave API.
+4.  Ejecuta:
+    ```powershell
+    npm install
+    npm run dev
+    ```
+5.  Accede a `http://localhost:1337`.
 
-### 3. Instalar dependencias
-```bash
-npm install
-```
+### Opción C: Docker (Contenedor Aislado)
 
-### 4. Iniciar Operaciones
-```bash
-npm run dev
-```
-Accede a `http://localhost:1337` en tu navegador.
+Ideal para servidores caseros o despliegue rápido.
 
-## 🔧 Solución de Problemas (Troubleshooting)
+1.  **Construir la imagen:**
+    ```bash
+    docker build -t aura-ops .
+    ```
+2.  **Ejecutar el contenedor (Inyectando la clave):**
+    ```bash
+    docker run -d -p 1337:1337 -e VITE_GEMINI_API_KEY=tu_clave_aqui aura-ops
+    ```
+3.  Accede a `http://localhost:1337` desde cualquier dispositivo en tu red.
 
-### Error: `sh: 1: vite: not found`
-Esto ocurre si la instalación se corrompió. Ejecuta estos comandos para arreglarlo:
-```bash
-rm -rf node_modules package-lock.json
-npm install
-npm run dev
-```
+## 🔧 Solución de Problemas
 
-### Error: `Node version warning`
-Asegúrate de tener Node.js versión 18 o superior.
-```bash
-node -v
-```
-Si es inferior, actualiza tu Kali: `sudo apt update && sudo apt install nodejs npm`.
+*   **`sh: 1: vite: not found`**: Ejecuta `rm -rf node_modules package-lock.json && npm install`.
+*   **Persistencia**: Tus API Keys y perfil se guardan en el navegador. Si borras caché, tendrás que reingresarlos.
 
 ## ⚠️ Disclaimer
 
 Esta herramienta ha sido creada únicamente con fines **educativos y de auditoría profesional autorizada**. El autor no se hace responsable del mal uso de esta plataforma.
 
 ---
-*Aura Ops // Red Horizon System v1.0*
+*Aura Ops // Red Horizon System v1.1*

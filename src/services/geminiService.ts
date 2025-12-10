@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, Chat, GenerateContentResponse } from "@google/genai";
 import { ModuleType, ApiKeys, Language, AuditReport } from "../types";
 
@@ -34,6 +35,12 @@ const MODULE_PROMPTS: Record<ModuleType, string> = {
   
   [ModuleType.BUG_BOUNTY_RECON]: "Bug Bounty Recon Expert. Tools: Subfinder, Amass, Assetfinder, HttpX. Focus on subdomain enumeration, wildcard discovery, and asset mapping. Scope validation.",
   [ModuleType.BUG_BOUNTY_VULN]: "Bug Bounty Scanner. Tools: Nuclei, Jaeger, GF patterns. Automating CVE detection, misconfigurations, and fuzzing. Focus on P1-P4 classification.",
+
+  [ModuleType.CLOUD_AWS]: "AWS Red Team Expert. Tools: Pacu, AWS CLI, ScoutSuite. Enum S3 buckets, IAM privesc, Lambda abuse.",
+  [ModuleType.CLOUD_AZURE]: "Azure Red Team Expert. Tools: AzureHound, RoadTools, MicroBurst. Enum Azure AD, Service Principals.",
+
+  [ModuleType.MOBILE_STATIC]: "Mobile Static Analyst. Tools: MobSF, Jadx, APKTool. Code review, hardcoded secrets, manifest analysis.",
+  [ModuleType.MOBILE_DYNAMIC]: "Mobile Dynamic Analyst. Tools: Frida, Objection. Runtime hooking, SSL Pinning bypass, root detection bypass.",
 
   [ModuleType.PAYLOAD_GEN]: "Malware Dev. MSFVenom, Veil. AV Evasion (encoding, encryption).",
   [ModuleType.PHISHING_PREP]: "Social Engineering. GoPhish, SET. Email templates, landing page cloning.",

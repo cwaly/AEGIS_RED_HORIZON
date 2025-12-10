@@ -64,7 +64,7 @@ typings/
 # Yarn Integrity file
 .yarn-integrity
 
-# dotenv environment variables file
+# dotenv environment variables file (SEGURIDAD CRITICA)
 .env
 .env.test
 .env.production
@@ -111,3 +111,7 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# OS files
+.DS_Store
+Thumbs.db
