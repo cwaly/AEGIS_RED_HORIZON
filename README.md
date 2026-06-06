@@ -161,10 +161,7 @@ El uso de este software para escanear, auditar o atacar infraestructura, redes o
 
 La responsabilidad absoluta del uso de las técnicas, comandos e inteligencia generada por esta plataforma recae íntegramente en la persona que lo opera. El creador de este proyecto no asumen ninguna responsabilidad por daños directos o indirectos causados por el mal uso de esta herramienta.
 
-*Fin del documento. Operar con precaución.*
 
-<div align="center">
-<br>
-<h3>🕸️ <i>Y recuerda: ¡"Un gran poder conlleva una gran responsabilidad"!</i> 🕸️</h3>
-<br>
-</div>
+Fin del documento. Operar con precaución.
+
+🕸️ Y recuerda: ¡"Un gran poder conlleva una gran responsabilidad"!🕸️
