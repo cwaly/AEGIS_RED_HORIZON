@@ -164,7 +164,7 @@ La responsabilidad absoluta del uso de las técnicas, comandos e inteligencia ge
 *Fin del documento. Operar con precaución.*
 
 <div align="center">
-  <br>
-  <h3>🕸️ <i>Y recuerda: ¡"Un gran poder conlleva una gran responsabilidad"!</i> 🕸️</h3>
-  <br>
+<br>
+<h3>🕸️ <i>Y recuerda: ¡"Un gran poder conlleva una gran responsabilidad"!</i> 🕸️</h3>
+<br>
 </div>
