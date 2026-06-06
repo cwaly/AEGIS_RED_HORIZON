@@ -1,15 +1,16 @@
-
 import { useEffect, useRef, useState, KeyboardEvent, ReactNode, FC } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Message } from '../types';
-import { Send, Terminal as TerminalIcon, Copy, Check, FileText, AlertTriangle } from 'lucide-react';
+import { Send, Terminal as TerminalIcon, Copy, Check, FileText, AlertTriangle, Trash2 } from 'lucide-react';
 
 interface TerminalProps {
   messages: Message[];
   onSendMessage: (text: string) => void;
   onGenerateReport: () => void;
+  onClearSession: () => void; // NUEVA PROPIEDAD
   isLoading: boolean;
   activeModule: string;
+  activeModuleName?: string;
 }
 
 const CodeBlock = ({ children, className }: { children: ReactNode, className?: string }) => {
@@ -33,7 +34,7 @@ const CodeBlock = ({ children, className }: { children: ReactNode, className?: s
         <div className="relative group my-4 rounded-md overflow-hidden border border-gray-700 bg-[#0d1117]">
             <div className="flex justify-between items-center px-4 py-1 bg-gray-800 border-b border-gray-700 text-xs text-gray-400">
                 <span>{match ? match[1] : 'bash'}</span>
-                <button onClick={handleCopy} className="flex items-center gap-1 hover:text-white">
+                <button onClick={handleCopy} title="Copiar código" aria-label="Copiar código" className="flex items-center gap-1 hover:text-white">
                     {copied ? <Check size={14} className="text-green-500" /> : <Copy size={14} />}
                     {copied ? 'Copiado' : 'Copiar'}
                 </button>
@@ -45,7 +46,7 @@ const CodeBlock = ({ children, className }: { children: ReactNode, className?: s
     );
 };
 
-export const Terminal: FC<TerminalProps> = ({ messages, onSendMessage, onGenerateReport, isLoading, activeModule }) => {
+export const Terminal: FC<TerminalProps> = ({ messages, onSendMessage, onGenerateReport, onClearSession, isLoading, activeModule, activeModuleName }) => {
   const [input, setInput] = useState('');
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -66,25 +67,35 @@ export const Terminal: FC<TerminalProps> = ({ messages, onSendMessage, onGenerat
     setInput('');
   };
 
+  const displayTitle = activeModuleName || activeModule.replace(/_/g, ' ');
+
   return (
     <div className="flex flex-col h-full bg-[#0a0a0c] border-l border-gray-800 font-mono relative overflow-hidden">
-      <div className="absolute inset-0 opacity-5 pointer-events-none" 
-           style={{ backgroundImage: 'linear-gradient(rgba(16, 185, 129, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(16, 185, 129, 0.1) 1px, transparent 1px)', backgroundSize: '20px 20px' }}>
-      </div>
+      <div className="absolute inset-0 opacity-5 pointer-events-none bg-[linear-gradient(rgba(244,63,94,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(244,63,94,0.1)_1px,transparent_1px)] [background-size:20px_20px]"></div>
 
       <div className="p-4 border-b border-gray-800 flex items-center justify-between bg-surface/50 backdrop-blur-sm z-10">
         <div className="flex items-center gap-2">
-            <TerminalIcon size={18} className="text-primary animate-pulse" />
-            <span className="text-sm font-bold text-gray-300">AURA_OPS // {activeModule}</span>
+            <TerminalIcon size={18} className="text-rose-500 animate-pulse" />
+            <span className="text-sm font-bold text-gray-300">AEGIS // {displayTitle}</span>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
+             <button 
+                onClick={onClearSession}
+                className="flex items-center gap-2 text-xs bg-gray-800/50 hover:bg-red-500/20 text-gray-400 hover:text-red-500 border border-gray-700 hover:border-red-500/50 px-3 py-1 rounded transition-colors"
+                title="Limpiar terminal e iniciar nueva auditoría"
+                aria-label="Limpiar terminal"
+             >
+                <Trash2 size={14} />
+                <span className="hidden md:inline">LIMPIAR</span>
+             </button>
              <button 
                 onClick={onGenerateReport}
-                className="flex items-center gap-2 text-xs bg-secondary/20 hover:bg-secondary/40 text-secondary border border-secondary/50 px-3 py-1 rounded transition-colors"
+                className="flex items-center gap-2 text-xs bg-rose-500/20 hover:bg-rose-500/40 text-rose-500 border border-rose-500/50 px-3 py-1 rounded transition-colors"
                 title="Generar Reporte de esta sesión"
+                aria-label="Generar Reporte de esta sesión"
              >
                 <FileText size={14} />
-                <span>GENERAR REPORTE</span>
+                <span className="hidden md:inline">REPORTE</span>
              </button>
         </div>
       </div>
@@ -101,12 +112,12 @@ export const Terminal: FC<TerminalProps> = ({ messages, onSendMessage, onGenerat
           <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div className={`max-w-[90%] md:max-w-[80%] rounded-lg p-4 ${
               msg.role === 'user' 
-                ? 'bg-primary/10 border border-primary/30 text-gray-200' 
+                ? 'bg-rose-500/10 border border-rose-500/30 text-gray-200' 
                 : 'bg-surface border border-gray-800 text-gray-300 shadow-lg'
             }`}>
               <div className="flex items-center gap-2 mb-2 text-xs opacity-50 uppercase tracking-wider">
-                <span className={msg.role === 'user' ? 'text-primary' : 'text-secondary'}>
-                    {msg.role === 'user' ? 'OPERATOR' : 'AURA_AI'}
+                <span className={msg.role === 'user' ? 'text-rose-500' : 'text-slate-400'}>
+                    {msg.role === 'user' ? 'OPERATOR' : 'AEGIS_AI'}
                 </span>
                 <span>{msg.timestamp.toLocaleTimeString()}</span>
               </div>
@@ -121,16 +132,15 @@ export const Terminal: FC<TerminalProps> = ({ messages, onSendMessage, onGenerat
         
         {isLoading && (
           <div className="flex justify-start">
-            <div className="bg-surface border border-gray-800 rounded-lg p-4 flex items-center gap-2 text-primary">
+            <div className="bg-surface border border-gray-800 rounded-lg p-4 flex items-center gap-2 text-rose-500">
               <span className="animate-pulse">_</span>
-              <span className="text-sm text-gray-400">Procesando inteligencia...</span>
+              <span className="text-sm text-gray-400">Procesando inteligencia táctica...</span>
             </div>
           </div>
         )}
         <div ref={bottomRef} />
       </div>
 
-      {/* Execution Warning Banner */}
       <div className="bg-yellow-900/20 border-t border-yellow-900/50 px-4 py-1 text-[10px] text-yellow-500 flex items-center justify-center gap-2">
         <AlertTriangle size={10} />
         <span>EXECUTION MODE: Copy commands above -{'>'} Run in Kali Terminal -{'>'} Paste output below</span>
@@ -138,19 +148,21 @@ export const Terminal: FC<TerminalProps> = ({ messages, onSendMessage, onGenerat
 
       <div className="p-4 bg-surface/80 border-t border-gray-800 backdrop-blur z-20">
         <div className="relative flex items-center">
-            <span className="absolute left-3 text-primary font-bold">{'>'}</span>
+            <span className="absolute left-3 text-rose-500 font-bold">{'>'}</span>
             <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Pegue aquí el output de su terminal..."
-            className="w-full bg-[#0a0a0c] border border-gray-700 rounded-md py-3 pl-8 pr-12 text-gray-200 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary font-mono shadow-inner"
+            placeholder="Pegue aquí el output de su terminal o introduzca un comando..."
+            className="w-full bg-[#0a0a0c] border border-gray-700 rounded-md py-3 pl-8 pr-12 text-gray-200 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 font-mono shadow-inner"
             autoFocus
             />
             <button 
                 onClick={handleSend}
                 disabled={isLoading}
+                title="Enviar comando" 
+                aria-label="Enviar comando"
                 className="absolute right-2 p-2 text-gray-400 hover:text-white disabled:opacity-50 transition-colors"
             >
             <Send size={18} />

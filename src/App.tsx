@@ -1,149 +1,139 @@
-
 import { useState, useEffect, FC, FormEvent } from 'react';
-import { ModuleType, Message, Tool, ModuleCategory, ApiKeys, UserProfile, Language, AuditReport } from './types';
+import { ModuleType, Message, Tool, ModuleCategory, ApiKeys, UserProfile, AuditReport } from './types';
 import { initializeChat, sendMessage, resetSession, generateReportData } from './services/geminiService';
 import { Terminal } from './components/Terminal';
 import { Logo } from './components/Logo';
 import { ReportModal } from './components/ReportModal';
 import { 
-  Terminal as TerminalIcon, 
-  Settings, 
-  FileText, 
-  Menu, 
-  X, 
-  ChevronDown, 
-  ChevronRight, 
-  Shield, 
-  Wifi, 
-  Globe, 
-  Database, 
-  Lock, 
-  Server, 
-  Eye, 
-  Zap, 
-  Cpu, 
-  Home, 
-  LogOut, 
-  Bug,
-  Smartphone,
-  Cloud,
-  Crosshair,
-  Search,
-  Key,
-  Radio,
-  List
+  Terminal as TerminalIcon, Settings, FileText, Menu, X, ChevronDown, 
+  ChevronRight, Shield, Wifi, Globe, Database, Lock, Server, Eye, Zap, 
+  Cpu, Bug, Smartphone, Cloud, Crosshair, Search, Key, 
+  Radio, List, Activity, Target, ShieldAlert, FolderSearch, Fingerprint, Users, Home, LogOut, AlertTriangle
 } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 
 const TOOLS_CONFIG: Tool[] = [
-  // Intel
-  { id: ModuleType.NMAP, name: 'Nmap / Masscan', description: 'Mapeo de Red', icon: 'TerminalIcon', category: ModuleCategory.INTELLIGENCE },
-  { id: ModuleType.SHODAN, name: 'Shodan API', description: 'Intel de Internet', icon: 'Globe', category: ModuleCategory.INTELLIGENCE },
-  { id: ModuleType.SHERLOCK, name: 'Sherlock', description: 'Búsqueda de Usuarios', icon: 'Search', category: ModuleCategory.INTELLIGENCE },
-  { id: ModuleType.SPIDERFOOT, name: 'SpiderFoot', description: 'OSINT Automatizado', icon: 'Eye', category: ModuleCategory.INTELLIGENCE },
-  { id: ModuleType.OSINT_GENERAL, name: 'OSINT Suite', description: 'TheHarvester / Maltego', icon: 'Eye', category: ModuleCategory.INTELLIGENCE },
-  { id: ModuleType.WIRESHARK, name: 'Sniffing', description: 'Wireshark / Ettercap', icon: 'Wifi', category: ModuleCategory.INTELLIGENCE },
+  // 🕵️ Inteligencia & OSINT
+  { id: ModuleType.OSINT_SHERLOCK, name: 'Sherlock', description: 'Búsqueda de Usuarios', icon: 'Search', category: ModuleCategory.INTELLIGENCE },
+  { id: ModuleType.OSINT_MALTEGO, name: 'Maltego', description: 'Análisis de Enlaces', icon: 'Eye', category: ModuleCategory.INTELLIGENCE },
+  { id: ModuleType.OSINT_RECON_NG, name: 'Recon-ng', description: 'OSINT Framework', icon: 'Target', category: ModuleCategory.INTELLIGENCE },
+  { id: ModuleType.CIBER_INTEL_MISP, name: 'MISP Intel', description: 'Threat Hunting Feeds', icon: 'Activity', category: ModuleCategory.INTELLIGENCE },
+  { id: ModuleType.DOXING_LEAKS, name: 'Doxing & Leaks', description: 'Correos y Fugas', icon: 'Database', category: ModuleCategory.INTELLIGENCE },
   
-  // Bug Bounty
-  { id: ModuleType.BUG_BOUNTY_RECON, name: 'Recon Masivo', description: 'Subfinder / Amass', icon: 'Globe', category: ModuleCategory.BUG_BOUNTY },
-  { id: ModuleType.BUG_BOUNTY_VULN, name: 'Vuln Scanning', description: 'Nuclei / Jaeger', icon: 'Bug', category: ModuleCategory.BUG_BOUNTY },
+  // 📚 Investigación de Vulnerabilidades & CTI (NUEVO)
+  { id: ModuleType.VULN_SEARCHSPLOIT, name: 'SearchSploit / CVE', description: 'Búsqueda de Exploits en Exploit-DB', icon: 'Database', category: ModuleCategory.VULN_RESEARCH },
+  { id: ModuleType.VULN_MITRE_OWASP, name: 'MITRE ATT&CK / OWASP', description: 'Tácticas, Técnicas y Top 10', icon: 'ShieldAlert', category: ModuleCategory.VULN_RESEARCH },
+  { id: ModuleType.VULN_CVSS_CALC, name: 'Calculadora CVSS', description: 'Métricas de Criticidad v3/v4', icon: 'Activity', category: ModuleCategory.VULN_RESEARCH },
 
-  // Cloud
-  { id: ModuleType.CLOUD_AWS, name: 'AWS Audit', description: 'Pacu / ScoutSuite', icon: 'Cloud', category: ModuleCategory.CLOUD_SECURITY },
-  { id: ModuleType.CLOUD_AZURE, name: 'Azure Audit', description: 'AzureHound / RoadTools', icon: 'Cloud', category: ModuleCategory.CLOUD_SECURITY },
+  // 🎯 Recon & Bug Bounty
+  { id: ModuleType.RECON_NMAP, name: 'Nmap', description: 'Port & Service Scan', icon: 'TerminalIcon', category: ModuleCategory.BUG_BOUNTY },
+  { id: ModuleType.RECON_MASSCAN, name: 'Masscan', description: 'Escaneo asíncrono', icon: 'Zap', category: ModuleCategory.BUG_BOUNTY },
+  { id: ModuleType.BUG_BOUNTY_RECON, name: 'Subfinder/Amass', description: 'Reconocimiento Masivo', icon: 'Globe', category: ModuleCategory.BUG_BOUNTY },
+  { id: ModuleType.BUG_BOUNTY_HTTPX, name: 'Httpx', description: 'Sondeo de activos vivos', icon: 'Activity', category: ModuleCategory.BUG_BOUNTY },
+  { id: ModuleType.BUG_BOUNTY_VULN_NUCLEI, name: 'Nuclei', description: 'Vuln Scanning rápido', icon: 'Bug', category: ModuleCategory.BUG_BOUNTY },
+  { id: ModuleType.BUG_BOUNTY_VULN_NESSUS, name: 'Nessus / OpenVAS', description: 'Escáner de Infraestructura', icon: 'ShieldAlert', category: ModuleCategory.BUG_BOUNTY },
 
-  // Mobile
-  { id: ModuleType.MOBILE_STATIC, name: 'Static Analysis', description: 'MobSF / Jadx', icon: 'Smartphone', category: ModuleCategory.MOBILE_HACKING },
-  { id: ModuleType.MOBILE_DYNAMIC, name: 'Dynamic Hook', description: 'Frida / Objection', icon: 'Smartphone', category: ModuleCategory.MOBILE_HACKING },
+  // ☁️ Cloud Security
+  { id: ModuleType.CLOUD_AWS_PACU, name: 'AWS Pacu', description: 'Auditoría AWS', icon: 'Cloud', category: ModuleCategory.CLOUD_SECURITY },
+  { id: ModuleType.CLOUD_AZURE_HOUND, name: 'AzureHound', description: 'Auditoría Azure AD', icon: 'Cloud', category: ModuleCategory.CLOUD_SECURITY },
 
-  // Weaponization
-  { id: ModuleType.COBALT_STRIKE, name: 'Cobalt Strike', description: 'Advanced Red Team C2', icon: 'Crosshair', category: ModuleCategory.WEAPONIZATION },
-  { id: ModuleType.SLIVER_C2, name: 'Sliver C2', description: 'Open Source Implant Fwk', icon: 'Crosshair', category: ModuleCategory.WEAPONIZATION },
-  { id: ModuleType.PAYLOAD_GEN, name: 'Payloads', description: 'MSFVenom / Veil', icon: 'Zap', category: ModuleCategory.WEAPONIZATION },
-  { id: ModuleType.PHISHING_PREP, name: 'Phishing Ops', description: 'GoPhish / SET', icon: 'Users', category: ModuleCategory.WEAPONIZATION },
+  // 📱 Mobile Hacking
+  { id: ModuleType.MOBILE_STATIC, name: 'MobSF', description: 'Análisis Estático', icon: 'Smartphone', category: ModuleCategory.MOBILE_HACKING },
+  { id: ModuleType.MOBILE_DYNAMIC, name: 'Frida/Objection', description: 'Dynamic Hooking', icon: 'Smartphone', category: ModuleCategory.MOBILE_HACKING },
+
+  // 🛠️ Weaponization & C2
+  { id: ModuleType.COBALT_STRIKE, name: 'Cobalt Strike', description: 'Advanced C2', icon: 'Crosshair', category: ModuleCategory.WEAPONIZATION },
+  { id: ModuleType.SLIVER_C2, name: 'Sliver C2', description: 'Implant Framework', icon: 'Crosshair', category: ModuleCategory.WEAPONIZATION },
+  { id: ModuleType.HAVOC_C2, name: 'Havoc C2', description: 'Modern C2 Framework', icon: 'Crosshair', category: ModuleCategory.WEAPONIZATION },
+  { id: ModuleType.PAYLOAD_GEN, name: 'MSFVenom / Villain', description: 'Generación de Payloads', icon: 'Zap', category: ModuleCategory.WEAPONIZATION },
+  { id: ModuleType.SOCIAL_ENGINEERING, name: 'SET Toolkit', description: 'Ingeniería Social', icon: 'Users', category: ModuleCategory.WEAPONIZATION },
+  { id: ModuleType.PHISHING_PREP, name: 'GoPhish', description: 'Campañas Phishing', icon: 'Target', category: ModuleCategory.WEAPONIZATION },
   
-  // Web
+  // 🌐 Web Hacking
   { id: ModuleType.BURP_CAIDO, name: 'Burp / Caido', description: 'Proxies de Intercepción', icon: 'Globe', category: ModuleCategory.WEB_HACKING },
+  { id: ModuleType.WHATWEB_CURL, name: 'WhatWeb / cURL / Wget', description: 'CLI Fingerprinting', icon: 'TerminalIcon', category: ModuleCategory.WEB_HACKING },
   { id: ModuleType.NIKTO, name: 'Nikto', description: 'Scanner Web Server', icon: 'List', category: ModuleCategory.WEB_HACKING },
-  { id: ModuleType.GOBUSTER_FFUF, name: 'Gobuster / Ffuf', description: 'Fuzzing & Dirbuster', icon: 'List', category: ModuleCategory.WEB_HACKING },
-  { id: ModuleType.SQLMAP, name: 'SQL Injection', description: 'SQLMap Auto', icon: 'Database', category: ModuleCategory.WEB_HACKING },
+  { id: ModuleType.GOBUSTER_FFUF, name: 'Gobuster / Ffuf / DirBuster', description: 'Fuzzing & Directorios', icon: 'FolderSearch', category: ModuleCategory.WEB_HACKING },
+  { id: ModuleType.SQLMAP, name: 'SQLmap', description: 'Inyección SQL', icon: 'Database', category: ModuleCategory.WEB_HACKING },
   { id: ModuleType.COMMIX, name: 'Commix', description: 'Command Injection', icon: 'TerminalIcon', category: ModuleCategory.WEB_HACKING },
-  { id: ModuleType.WPSCAN, name: 'CMS Audit', description: 'WPScan / JoomScan', icon: 'FileText', category: ModuleCategory.WEB_HACKING },
-  { id: ModuleType.OWASP_ZAP, name: 'Web Scanner', description: 'OWASP ZAP', icon: 'Shield', category: ModuleCategory.WEB_HACKING },
+  { id: ModuleType.WPSCAN_CMS, name: 'WPScan / CMS', description: 'Auditoría CMS', icon: 'FileText', category: ModuleCategory.WEB_HACKING },
+  { id: ModuleType.OWASP_ZAP, name: 'OWASP ZAP', description: 'Web Scanner', icon: 'Shield', category: ModuleCategory.WEB_HACKING },
   
-  // Initial Access
-  { id: ModuleType.METASPLOIT, name: 'Metasploit Fwk', description: 'Exploitation Core', icon: 'TerminalIcon', category: ModuleCategory.INITIAL_ACCESS },
-  { id: ModuleType.RESPONDER, name: 'Responder', description: 'LLMNR Poisoning', icon: 'Wifi', category: ModuleCategory.INITIAL_ACCESS },
-  { id: ModuleType.HYDRA_HASHCAT, name: 'Cracking', description: 'Hydra / Hashcat', icon: 'Lock', category: ModuleCategory.INITIAL_ACCESS },
+  // 🔓 Initial Access
+  { id: ModuleType.METASPLOIT, name: 'Metasploit Framework', description: 'Exploitation Core', icon: 'TerminalIcon', category: ModuleCategory.INITIAL_ACCESS },
+  { id: ModuleType.RESPONDER, name: 'Responder', description: 'LLMNR/NBT-NS Poisoning', icon: 'Wifi', category: ModuleCategory.INITIAL_ACCESS },
+  { id: ModuleType.HYDRA_HASHCAT, name: 'Hydra / Hashcat / John', description: 'Brute Force & Rainbow Tables', icon: 'Lock', category: ModuleCategory.INITIAL_ACCESS },
   { id: ModuleType.WIFITE, name: 'Wifite 2', description: 'Auto-Wifi Audit', icon: 'Radio', category: ModuleCategory.INITIAL_ACCESS },
   { id: ModuleType.BETTERCAP, name: 'Bettercap', description: 'MITM / BLE / Wifi', icon: 'Radio', category: ModuleCategory.INITIAL_ACCESS },
   { id: ModuleType.KISMET, name: 'Kismet', description: 'Wireless Sniffer', icon: 'Radio', category: ModuleCategory.INITIAL_ACCESS },
-  { id: ModuleType.WIFI_ATTACKS, name: 'Aircrack-ng', description: 'Suite Manual', icon: 'Wifi', category: ModuleCategory.INITIAL_ACCESS },
+  { id: ModuleType.WIFI_ATTACKS, name: 'Aircrack-ng', description: 'Suite Manual Wifi', icon: 'Wifi', category: ModuleCategory.INITIAL_ACCESS },
   
-  // Post Exploit
-  { id: ModuleType.PRIV_ESC, name: 'PrivEsc', description: 'LinPEAS / WinPEAS', icon: 'Zap', category: ModuleCategory.POST_EXPLOITATION },
-  { id: ModuleType.ACTIVE_DIRECTORY, name: 'Active Directory', description: 'Bloodhound / Impacket', icon: 'Server', category: ModuleCategory.POST_EXPLOITATION },
+  // 🚩 Post Exploitation
+  { id: ModuleType.PRIV_ESC, name: 'LinPEAS / WinPEAS', description: 'Escalada de Privilegios', icon: 'Zap', category: ModuleCategory.POST_EXPLOITATION },
+  { id: ModuleType.ACTIVE_DIRECTORY, name: 'Bloodhound / Impacket', description: 'Active Directory', icon: 'Server', category: ModuleCategory.POST_EXPLOITATION },
   { id: ModuleType.CRACKMAPEXEC, name: 'CrackMapExec', description: 'NetExec / SMB Spray', icon: 'Server', category: ModuleCategory.POST_EXPLOITATION },
   { id: ModuleType.MIMIKATZ, name: 'Mimikatz', description: 'Credential Dumping', icon: 'Key', category: ModuleCategory.POST_EXPLOITATION },
-  { id: ModuleType.PERSISTENCE, name: 'Persistencia', description: 'Backdoors / C2', icon: 'Ghost', category: ModuleCategory.POST_EXPLOITATION },
+  { id: ModuleType.PERSISTENCE, name: 'Persistencia', description: 'Backdoors / Tareas', icon: 'Shield', category: ModuleCategory.POST_EXPLOITATION },
   
-  // Reporting
+  // 🔍 Análisis Forense & DFIR
+  { id: ModuleType.FORENSICS_AUTOPSY, name: 'Autopsy', description: 'Análisis de Artefactos', icon: 'Fingerprint', category: ModuleCategory.FORENSICS },
+  { id: ModuleType.FORENSICS_VOLATILITY, name: 'Volatility 3', description: 'Análisis en Memoria', icon: 'Cpu', category: ModuleCategory.FORENSICS },
+  { id: ModuleType.FORENSICS_WIRESHARK, name: 'Wireshark', description: 'Análisis de PCAP', icon: 'Activity', category: ModuleCategory.FORENSICS },
+
+  // 📊 Reporting
   { id: ModuleType.REPORT_GENERATOR, name: 'Report Builder', description: 'Generar Informe Final', icon: 'FileText', category: ModuleCategory.REPORTING },
 ];
 
 const App: FC = () => {
-  // --- STATE INIT WITH LOCALSTORAGE PERSISTENCE ---
   const [userProfile, setUserProfile] = useState<UserProfile | null>(() => {
-    const saved = localStorage.getItem('aura_user_profile');
+    const saved = localStorage.getItem('aegis_user_profile');
     return saved ? JSON.parse(saved) : null;
   });
 
   const [apiKeys, setApiKeys] = useState<ApiKeys>(() => {
-    const saved = localStorage.getItem('aura_api_keys');
-    return saved ? JSON.parse(saved) : { shodan: '', virusTotal: '', wpscan: '', openai: '' };
+    const saved = localStorage.getItem('aegis_api_keys');
+    return saved ? JSON.parse(saved) : { openai: '' };
   });
 
-  // Persist Profile changes
   useEffect(() => {
-    if (userProfile) {
-      localStorage.setItem('aura_user_profile', JSON.stringify(userProfile));
-    } else {
-      localStorage.removeItem('aura_user_profile');
-    }
+    if (userProfile) localStorage.setItem('aegis_user_profile', JSON.stringify(userProfile));
+    else localStorage.removeItem('aegis_user_profile');
   }, [userProfile]);
 
-  // Persist API Key changes
   useEffect(() => {
-    localStorage.setItem('aura_api_keys', JSON.stringify(apiKeys));
+    localStorage.setItem('aegis_api_keys', JSON.stringify(apiKeys));
   }, [apiKeys]);
-
 
   const [loginName, setLoginName] = useState('');
   const [currentView, setCurrentView] = useState<'dashboard' | 'module'>('dashboard');
-  const [activeModule, setActiveModule] = useState<ModuleType>(ModuleType.NMAP);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [activeModule, setActiveModule] = useState<ModuleType>(ModuleType.RECON_NMAP);
+  
+  const [sessionsData, setSessionsData] = useState<Record<string, Message[]>>({});
+  
   const [isLoading, setIsLoading] = useState(false);
   const [reportData, setReportData] = useState<AuditReport | null>(null);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [language, setLanguage] = useState<Language>('es');
   
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({
-    [ModuleCategory.INTELLIGENCE]: true,
-    [ModuleCategory.BUG_BOUNTY]: false,
+    [ModuleCategory.INTELLIGENCE]: false,
+    [ModuleCategory.VULN_RESEARCH]: false, // NUEVO
+    [ModuleCategory.BUG_BOUNTY]: false, 
     [ModuleCategory.CLOUD_SECURITY]: false,
     [ModuleCategory.MOBILE_HACKING]: false,
     [ModuleCategory.WEAPONIZATION]: false,
     [ModuleCategory.WEB_HACKING]: false,
     [ModuleCategory.INITIAL_ACCESS]: false,
     [ModuleCategory.POST_EXPLOITATION]: false,
-    [ModuleCategory.REPORTING]: true,
+    [ModuleCategory.FORENSICS]: false,
+    [ModuleCategory.REPORTING]: false,
   });
 
   const toggleCategory = (cat: string) => setExpandedCategories(prev => ({...prev, [cat]: !prev[cat]}));
+  
   const getIcon = (iconName: string) => {
-    const icons: any = { TerminalIcon, Globe, Eye, Wifi, Zap, Users: Shield, Database, FileText, Shield, Lock, Server, Ghost: Shield, Cpu, Bug, Smartphone, Cloud, Crosshair, Search, Key, Radio, List };
+    const icons: any = { TerminalIcon, Globe, Eye, Wifi, Zap, Database, FileText, Shield, Lock, Server, Cpu, Bug, Smartphone, Cloud, Crosshair, Search, Key, Radio, List, Activity, Target, ShieldAlert, FolderSearch, Fingerprint, Users };
     const Icon = icons[iconName] || TerminalIcon;
     return <Icon size={18} />;
   };
@@ -152,49 +142,53 @@ const App: FC = () => {
     e.preventDefault();
     if (!loginName.trim()) return;
     
-    // Improved Initials Logic
     const cleanName = loginName.trim().replace(/\s+/g, ' ');
     const parts = cleanName.split(' ');
     let initials = parts[0][0];
-    if (parts.length > 1) {
-        initials += parts[parts.length - 1][0];
-    } else if (cleanName.length > 1) {
-        initials += cleanName[1];
-    }
+    if (parts.length > 1) initials += parts[parts.length - 1][0];
+    else if (cleanName.length > 1) initials += cleanName[1];
     
     setUserProfile({ name: cleanName, initials: initials.toUpperCase(), role: 'Senior Auditor' });
+  };
+
+  const addMessage = (module: string, content: string, role: 'user' | 'model' | 'system') => {
+    const newMessage: Message = { id: uuidv4(), role, content, timestamp: new Date() };
+    setSessionsData(prev => ({
+        ...prev,
+        [module]: [...(prev[module] || []), newMessage]
+    }));
   };
 
   const handleModuleSelect = async (module: ModuleType) => {
     setActiveModule(module);
     setCurrentView('module');
-    setMessages([]);
+    
+    if (sessionsData[module] && sessionsData[module].length > 0) {
+        return;
+    }
+
     setIsLoading(true);
     try {
-      resetSession();
-      await initializeChat(module, apiKeys, language);
-      let initialPrompt = language === 'es' ? `Inicializando módulo ${module}. ¿Target?` : `Initializing module ${module}. Target?`;
-      const response = await sendMessage(initialPrompt);
-      addMessage(response, 'model');
+      await initializeChat(module, apiKeys, 'es');
+      const initialPrompt = `Inicializando módulo ${module}. ¿Target u objetivo del CTF?`;
+      const response = await sendMessage(module, initialPrompt); 
+      addMessage(module, response, 'model');
     } catch (e) {
-      addMessage("Error crítico: Fallo en inicialización de IA. Verifique su API Key en .env", 'system');
+      addMessage(module, "Error crítico: Fallo en inicialización de IA. Verifique su API Key en .env", 'system');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const addMessage = (content: string, role: 'user' | 'model' | 'system') => {
-    setMessages(prev => [...prev, { id: uuidv4(), role, content, timestamp: new Date() }]);
-  };
-
   const handleUserMessage = async (text: string) => {
-    addMessage(text, 'user');
+    const currentMod = activeModule; 
+    addMessage(currentMod, text, 'user');
     setIsLoading(true);
     try {
-      const response = await sendMessage(text);
-      addMessage(response, 'model');
+      const response = await sendMessage(currentMod, text);
+      addMessage(currentMod, response, 'model');
     } catch (e) {
-      addMessage("Error de conexión con el núcleo de IA.", 'system');
+      addMessage(currentMod, "Error de conexión con el núcleo de IA.", 'system');
     } finally {
       setIsLoading(false);
     }
@@ -202,34 +196,56 @@ const App: FC = () => {
 
   const handleGenerateReport = async () => {
     setIsLoading(true);
-    addMessage("Iniciando compilación de evidencias...", 'system');
+    addMessage(activeModule, "Iniciando compilación de evidencias...", 'system');
     try {
         const report = await generateReportData(activeModule, userProfile?.name || 'Unknown');
         if (report) {
             setReportData(report);
             setIsReportModalOpen(true);
-            addMessage("Reporte generado exitosamente.", 'system');
+            addMessage(activeModule, "Reporte generado exitosamente.", 'system');
         } else {
-            addMessage("Error generando reporte: La IA no devolvió datos estructurados válidos.", 'system');
+            addMessage(activeModule, "Error generando reporte: La IA no devolvió datos estructurados válidos.", 'system');
         }
     } catch (e) {
-        addMessage("Error crítico al generar reporte.", 'system');
+        addMessage(activeModule, "Error crítico al generar reporte.", 'system');
     } finally {
         setIsLoading(false);
     }
   };
 
+  const handleClearSession = async () => {
+    resetSession(activeModule);
+    setSessionsData(prev => ({ ...prev, [activeModule]: [] }));
+    
+    setIsLoading(true);
+    try {
+      await initializeChat(activeModule, apiKeys, 'es');
+      const initialPrompt = `Inicializando módulo ${activeModule}. Memoria reseteada. Nueva auditoría iniciada. ¿Target u objetivo del CTF?`;
+      const response = await sendMessage(activeModule, initialPrompt);
+      addMessage(activeModule, response, 'model');
+    } catch (e) {
+      addMessage(activeModule, "Error crítico: Fallo en inicialización de IA.", 'system');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const activeToolObj = TOOLS_CONFIG.find(t => t.id === activeModule);
+  const activeToolName = activeToolObj ? activeToolObj.name.toUpperCase() : activeModule;
+  
+  const currentMessages = sessionsData[activeModule] || [];
+
   if (!userProfile) {
     return (
       <div className="h-screen w-full bg-[#0a0a0c] flex items-center justify-center relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 50% 50%, #ef4444 0%, transparent 50%)' }}></div>
+        <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(circle_at_50%_50%,#f43f5e_0%,transparent_50%)]"></div>
         <div className="z-10 bg-surface border border-gray-800 p-8 rounded-2xl shadow-2xl w-full max-w-md text-center">
             <Logo className="w-24 h-24 mx-auto mb-6" />
-            <h1 className="text-2xl font-bold text-white mb-2">AURA OPS</h1>
-            <h2 className="text-sm text-primary tracking-[0.4em] mb-8">RED HORIZON ACCESS</h2>
+            <h1 className="text-2xl font-bold text-white mb-2">AEGIS</h1>
+            <h2 className="text-sm text-rose-500 tracking-[0.4em] mb-8">RED HORIZON ACCESS</h2>
             <form onSubmit={handleLogin} className="space-y-4">
-                <input type="text" value={loginName} onChange={(e) => setLoginName(e.target.value)} placeholder="Enter your name..." className="w-full bg-black/50 border border-gray-700 text-white p-3 rounded-lg focus:border-primary focus:outline-none transition-colors" autoFocus />
-                <button type="submit" className="w-full bg-gradient-to-r from-secondary to-primary text-white font-bold py-3 rounded-lg hover:opacity-90 transition-opacity">AUTHENTICATE</button>
+                <input type="text" value={loginName} onChange={(e) => setLoginName(e.target.value)} placeholder="Enter tu nombre o alias de CTF..." className="w-full bg-black/50 border border-gray-700 text-white p-3 rounded-lg focus:border-rose-500 focus:outline-none transition-colors" autoFocus />
+                <button type="submit" className="w-full bg-gradient-to-r from-slate-700 to-rose-600 text-white font-bold py-3 rounded-lg hover:opacity-90 transition-opacity">AUTHENTICATE</button>
             </form>
             <div className="mt-8 text-xs text-gray-600">Created by César Matute</div>
         </div>
@@ -243,40 +259,88 @@ const App: FC = () => {
       {settingsOpen && (
         <div className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-surface border border-gray-700 p-6 rounded-lg w-full max-w-md shadow-2xl relative">
-            <button onClick={() => setSettingsOpen(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X /></button>
-            <h2 className="text-xl font-bold mb-4 flex items-center gap-2 text-primary"><Settings size={20} /> System Configuration</h2>
-            <div className="mb-6">
-                <label className="block text-xs uppercase text-gray-500 mb-2">Language</label>
-                <div className="flex bg-black/50 rounded p-1 border border-gray-700">
-                    <button onClick={() => setLanguage('es')} className={`flex-1 py-1 text-sm rounded ${language === 'es' ? 'bg-primary text-white' : 'text-gray-400'}`}>Español</button>
-                    <button onClick={() => setLanguage('en')} className={`flex-1 py-1 text-sm rounded ${language === 'en' ? 'bg-primary text-white' : 'text-gray-400'}`}>English</button>
+            <button onClick={() => setSettingsOpen(false)} title="Cerrar panel" aria-label="Cerrar panel" className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"><X /></button>
+            <h2 className="text-xl font-bold mb-6 flex items-center gap-2 text-rose-500">
+                <Settings size={20} /> OPSEC & SYSTEM
+            </h2>
+            
+            <div className="space-y-6">
+                {/* 1. System Status */}
+                <div className="bg-[#0a0a0c] border border-gray-800 p-4 rounded-lg shadow-inner">
+                    <h3 className="text-[10px] text-gray-500 font-bold tracking-widest mb-3 uppercase">Conectividad del C2</h3>
+                    <div className="flex items-center justify-between text-sm mb-2">
+                        <span className="text-gray-300 font-medium">AEGIS AI Core</span>
+                        <span className="flex items-center gap-2 text-green-500 font-mono text-xs"><span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> ONLINE</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm mb-3">
+                        <span className="text-gray-300 font-medium">External APIs</span>
+                        <span className="text-yellow-500 flex items-center gap-1 font-mono text-xs"><ShieldAlert size={12}/> SECURE (.env)</span>
+                    </div>
+                    {/* Botón de ayuda para la comunidad */}
+                    <a 
+                        href="https://aistudio.google.com/app/apikey" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center gap-2 w-full py-2 mt-2 bg-blue-900/20 hover:bg-blue-600/30 text-blue-400 hover:text-blue-300 border border-blue-800/50 rounded transition-colors text-xs font-bold"
+                        title="Abre Google AI Studio en una nueva pestaña"
+                    >
+                        OBTENER API KEY GRATUITA EN GOOGLE AI STUDIO ↗
+                    </a>
+                </div>
+
+                {/* 2. Operator Profile */}
+                <div className="bg-[#0a0a0c] border border-gray-800 p-4 rounded-lg shadow-inner">
+                    <h3 className="text-[10px] text-gray-500 font-bold tracking-widest mb-3 uppercase">Perfil de Operador</h3>
+                    <div className="space-y-2">
+                        <label htmlFor="operator-alias" className="text-xs text-gray-400">Alias / Callsign</label>
+                        <input
+                            id="operator-alias"
+                            type="text"
+                            title="Alias del operador"
+                            aria-label="Alias del operador"
+                            placeholder="Introduce tu alias..."
+                            value={userProfile.name}
+                            onChange={(e) => setUserProfile({...userProfile, name: e.target.value})}
+                            className="w-full bg-black/50 border border-gray-700 text-rose-500 font-bold p-2 rounded focus:border-rose-500 focus:outline-none text-sm"
+                        />
+                    </div>
+                </div>
+
+                {/* 3. Panic Button */}
+                <div className="pt-2">
+                    <button 
+                        onClick={() => {
+                            localStorage.clear();
+                            window.location.reload();
+                        }}
+                        className="w-full flex items-center justify-center gap-2 bg-red-950/40 hover:bg-red-600 text-red-500 hover:text-white border border-red-900/50 hover:border-red-500 font-bold py-3 rounded-lg transition-all duration-300"
+                        title="Borra todos los datos locales y cierra sesión"
+                    >
+                        <AlertTriangle size={18} />
+                        PANIC BUTTON (Wipe Data)
+                    </button>
+                    <p className="text-center text-[10px] text-gray-500 mt-2">Destruye la sesión actual y limpia el LocalStorage.</p>
                 </div>
             </div>
-            <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
-              <div><label className="block text-xs uppercase text-gray-500 mb-1">Shodan API Key</label><input type="password" className="w-full bg-black/50 border border-gray-700 p-2 rounded text-sm" value={apiKeys.shodan || ''} onChange={(e) => setApiKeys({...apiKeys, shodan: e.target.value})} /></div>
-              <div><label className="block text-xs uppercase text-gray-500 mb-1">VirusTotal API Key</label><input type="password" className="w-full bg-black/50 border border-gray-700 p-2 rounded text-sm" value={apiKeys.virusTotal || ''} onChange={(e) => setApiKeys({...apiKeys, virusTotal: e.target.value})} /></div>
-              <div><label className="block text-xs uppercase text-gray-500 mb-1">WPScan API Token</label><input type="password" className="w-full bg-black/50 border border-gray-700 p-2 rounded text-sm" value={apiKeys.wpscan || ''} onChange={(e) => setApiKeys({...apiKeys, wpscan: e.target.value})} /></div>
-            </div>
-            <div className="mt-6"><button onClick={() => setSettingsOpen(false)} className="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 rounded transition-colors">Save & Close</button></div>
           </div>
         </div>
       )}
-      <button className="md:hidden fixed top-4 left-4 z-50 p-2 bg-surface border border-gray-700 rounded-md shadow-lg" onClick={() => setSidebarOpen(!sidebarOpen)}>{sidebarOpen ? <X /> : <Menu />}</button>
+      <button className="md:hidden fixed top-4 left-4 z-50 p-2 bg-surface border border-gray-700 rounded-md shadow-lg" onClick={() => setSidebarOpen(!sidebarOpen)} title={sidebarOpen ? "Cerrar menú" : "Abrir menú"} aria-label={sidebarOpen ? "Cerrar menú" : "Abrir menú"}>{sidebarOpen ? <X /> : <Menu />}</button>
       <aside className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 transition-transform fixed md:relative z-40 w-72 h-full bg-surface border-r border-gray-800 flex flex-col shadow-2xl`}>
         <div className="p-6 border-b border-gray-800 flex flex-col items-center relative">
-          <button onClick={() => setSettingsOpen(true)} className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors"><Settings size={16} /></button>
-          <Logo className="w-14 h-14 mb-3" />
-          <h1 className="text-lg font-bold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-secondary to-primary text-center">AURA OPS<br/><span className="text-xs tracking-[0.3em] text-gray-500">RED HORIZON</span></h1>
+          <button onClick={() => setSettingsOpen(true)} title="Configuración del sistema" aria-label="Configuración del sistema" className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors"><Settings size={16} /></button>
+          <Logo className="w-16 h-16 mb-3" />
+          <h1 className="text-lg font-bold tracking-wider text-white text-center">AEGIS<br/><span className="text-xs tracking-[0.3em] text-rose-500">RED HORIZON</span></h1>
         </div>
-        <div className="px-4 py-2 mt-2"><button onClick={() => setCurrentView('dashboard')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${currentView === 'dashboard' ? 'bg-primary/20 text-white border border-primary/50' : 'text-gray-400 hover:bg-white/5'}`}><Home size={18} /><span className="font-bold text-sm">DASHBOARD</span></button></div>
+        <div className="px-4 py-2 mt-2"><button onClick={() => setCurrentView('dashboard')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${currentView === 'dashboard' ? 'bg-rose-500/20 text-white border border-rose-500/50' : 'text-gray-400 hover:bg-white/5'}`}><Home size={18} /><span className="font-bold text-sm">DASHBOARD</span></button></div>
         <nav className="flex-1 overflow-y-auto py-2 px-0 space-y-0 custom-scrollbar">
           {Object.values(ModuleCategory).map((category) => (
             <div key={category} className="border-b border-gray-800/50">
-              <button onClick={() => toggleCategory(category)} className="w-full flex items-center justify-between px-4 py-3 text-xs font-bold uppercase tracking-wider text-gray-400 hover:bg-gray-800/50 hover:text-white transition-colors"><span>{category}</span>{expandedCategories[category] ? <ChevronDown size={14} /> : <ChevronRight size={14} />}</button>
+              <button onClick={() => toggleCategory(category)} className="w-full flex items-center justify-between px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 hover:bg-gray-800/50 hover:text-white transition-colors"><span>{category}</span>{expandedCategories[category] ? <ChevronDown size={14} /> : <ChevronRight size={14} />}</button>
               {expandedCategories[category] && (
                 <div className="bg-[#0f0f13] pb-2">
                   {TOOLS_CONFIG.filter(t => t.category === category).map(tool => (
-                    <button key={tool.id} onClick={() => { handleModuleSelect(tool.id); if (window.innerWidth < 768) setSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-6 py-2 text-sm border-l-2 transition-all duration-200 ${activeModule === tool.id && currentView === 'module' ? 'border-primary bg-primary/10 text-white' : 'border-transparent text-gray-500 hover:text-gray-300 hover:bg-white/5'}`}><span className={activeModule === tool.id && currentView === 'module' ? 'text-primary' : ''}>{getIcon(tool.icon)}</span><div className="text-left"><div className="font-medium leading-none mb-1">{tool.name}</div></div></button>
+                    <button key={tool.id} onClick={() => { handleModuleSelect(tool.id); if (window.innerWidth < 768) setSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-6 py-2 text-sm border-l-2 transition-all duration-200 ${activeModule === tool.id && currentView === 'module' ? 'border-rose-500 bg-rose-500/10 text-white' : 'border-transparent text-gray-500 hover:text-gray-300 hover:bg-white/5'}`}><span className={activeModule === tool.id && currentView === 'module' ? 'text-rose-500' : ''}>{getIcon(tool.icon)}</span><div className="text-left"><div className="font-medium leading-none mb-1">{tool.name}</div></div></button>
                   ))}
                 </div>
               )}
@@ -284,9 +348,9 @@ const App: FC = () => {
           ))}
         </nav>
         <div className="p-4 bg-[#08080a] border-t border-gray-800 flex items-center gap-3">
-           <div className="h-10 w-10 rounded-full bg-gradient-to-br from-secondary to-primary flex items-center justify-center text-white font-bold text-lg shadow-lg">{userProfile.initials}</div>
-           <div className="flex-1 overflow-hidden"><div className="text-sm font-bold text-white truncate">{userProfile.name}</div><div className="text-xs text-primary truncate">{userProfile.role}</div></div>
-           <button onClick={() => { setUserProfile(null); localStorage.removeItem('aura_user_profile'); }} className="text-gray-500 hover:text-red-500 transition-colors"><LogOut size={16} /></button>
+           <div className="h-10 w-10 rounded-full bg-gradient-to-br from-slate-700 to-rose-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">{userProfile.initials}</div>
+           <div className="flex-1 overflow-hidden"><div className="text-sm font-bold text-white truncate">{userProfile.name}</div><div className="text-xs text-rose-500 truncate">{userProfile.role}</div></div>
+           <button onClick={() => { setUserProfile(null); localStorage.removeItem('aegis_user_profile'); }} title="Cerrar sesión" aria-label="Cerrar sesión" className="text-gray-500 hover:text-red-500 transition-colors"><LogOut size={16} /></button>
         </div>
       </aside>
       <main className="flex-1 flex flex-col relative h-full bg-[#0a0a0c]">
@@ -294,22 +358,22 @@ const App: FC = () => {
             <div className="h-full overflow-y-auto p-8">
                 <div className="max-w-6xl mx-auto">
                     <div className="mb-8 flex justify-between items-end">
-                        <div><h2 className="text-3xl font-bold text-white mb-2">Command Center</h2><p className="text-gray-400">Welcome back, {userProfile.name}. System ready.</p></div>
-                        <div className="flex gap-4 text-xs font-mono text-gray-500"><span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-green-500"></span> ONLINE</span></div>
+                        <div><h2 className="text-3xl font-bold text-white mb-2">Command Center</h2><p className="text-gray-400">Bienvenido, {userProfile.name}. Plataforma lista para CTFs y Auditorías.</p></div>
+                        <div className="flex gap-4 text-xs font-mono text-gray-500"><span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> ONLINE</span></div>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                         {TOOLS_CONFIG.map(tool => (
-                            <button key={tool.id} onClick={() => handleModuleSelect(tool.id)} className="bg-surface border border-gray-800 p-6 rounded-xl hover:border-primary/50 hover:bg-surface/80 transition-all group text-left">
-                                <div className="flex items-start justify-between mb-4"><div className="p-3 rounded-lg bg-gray-900 text-primary group-hover:scale-110 transition-transform">{getIcon(tool.icon)}</div><span className="text-[10px] uppercase font-bold text-gray-600 bg-black/30 px-2 py-1 rounded">{tool.category.split('&')[0]}</span></div>
-                                <h3 className="text-lg font-bold text-white mb-1 group-hover:text-primary transition-colors">{tool.name}</h3>
-                                <p className="text-sm text-gray-500">{tool.description}</p>
+                            <button key={tool.id} onClick={() => handleModuleSelect(tool.id)} className="bg-surface border border-gray-800 p-5 rounded-xl hover:border-rose-500/50 hover:bg-surface/80 transition-all group text-left">
+                                <div className="flex items-start justify-between mb-4"><div className="p-3 rounded-lg bg-gray-900 text-rose-500 group-hover:scale-110 transition-transform">{getIcon(tool.icon)}</div><span className="text-[9px] uppercase font-bold text-gray-600 bg-black/30 px-2 py-1 rounded truncate max-w-[100px]">{tool.category.split('&')[0]}</span></div>
+                                <h3 className="text-base font-bold text-white mb-1 group-hover:text-rose-400 transition-colors">{tool.name}</h3>
+                                <p className="text-xs text-gray-500">{tool.description}</p>
                             </button>
                         ))}
                     </div>
                 </div>
             </div>
         )}
-        {currentView === 'module' && (<Terminal messages={messages} onSendMessage={handleUserMessage} onGenerateReport={handleGenerateReport} isLoading={isLoading} activeModule={activeModule} />)}
+        {currentView === 'module' && (<Terminal messages={currentMessages} onSendMessage={handleUserMessage} onGenerateReport={handleGenerateReport} onClearSession={handleClearSession} isLoading={isLoading} activeModule={activeModule} activeModuleName={activeToolName} />)}
       </main>
     </div>
   );

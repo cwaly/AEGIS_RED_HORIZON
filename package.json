@@ -1,5 +1,7 @@
 {
-  "name": "aura-ops",
+  "name": "aegis-red-horizon",
+  "author": "César Matute",
+  "description": "AEGIS: Red Horizon - AI-Powered Offensive Operations C2",
   "private": true,
   "version": "1.0.0",
   "type": "module",

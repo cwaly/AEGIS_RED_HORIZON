@@ -1,112 +1,110 @@
-# 📘 AURA OPS: MANUAL DE OPERACIONES Y DOCTRINA
+# <img src="./assets/0_Logo.jpg" width="35" align="absmiddle" style="border-radius: 50%;"/> AEGIS: MANUAL DE OPERACIONES Y DOCTRINA
+Clasificación: USO INTERNO / AUDITORES AUTORIZADOS
 
-> **Clasificación:** USO INTERNO / AUDITORES AUTORIZADOS  
-> **Arquitecto:** César Matute (Senior Auditor)  
-> **Sistema:** Red Horizon C2 Intelligence Core
+Arquitecto: César Matute (Auditor)
 
----
+Sistema: Red Horizon C2 Intelligence Core
 
-## 1. GÉNESIS: ¿Por qué existe Aura Ops?
+1. GÉNESIS: El Ecosistema AEGIS y la Doctrina Operativa
+En el panorama actual de la ciberseguridad, los equipos de Red Team a menudo se encuentran saturados gestionando decenas de herramientas desconectadas, perdiendo tiempo valioso en la sintaxis técnica en lugar de centrarse en la estrategia del ataque.
 
-En el panorama actual de la ciberseguridad, la brecha entre la **detección** de una vulnerabilidad y su **explotación efectiva** se ha vuelto crítica. Los equipos de Red Team a menudo se encuentran saturados por la gestión de herramientas desconectadas (Nmap, Burp, Metasploit, AWS CLI), perdiendo tiempo valioso en la sintaxis de comandos en lugar de centrarse en la **estrategia del ataque**.
+Para solucionar esto, nace AEGIS. Un ecosistema unificado de ciberseguridad que abarca el ciclo completo de una auditoría y gestión de riesgos:
 
-**Aura Ops: Red Horizon** nace con una misión revolucionaria: **Democratizar la Inteligencia Ofensiva de Nivel Senior**.
+AEGIS: Governance: Diseñado para la creación en su totalidad de un Sistema de Gestión de Seguridad de la Información (SGSI / ISMS), gobernanza y cumplimiento normativo.
 
-Mientras que su predecesora, **AURA GRC**, se enfocaba en la defensa, el cumplimiento y la gobernanza (Blue Team), Aura Ops cruza la línea hacia la ofensiva (Red Team).
+AEGIS: Vanguard Core: Plataforma de monitorización y defensa activa que actúa como puente táctico-GRC, traduciendo hallazgos técnicos en métricas de impacto financiero para la Alta Dirección.
 
-No fue creada para reemplazar al operador humano, sino para actuar como un **Multiplicador de Fuerza**. Su propósito es ser el "Cerebro" (C2 - Command & Control) que orquesta las manos del auditor, asegurando que cada escaneo, cada exploit y cada reporte siga una metodología rigurosa, asistida por Inteligencia Artificial (Google Gemini 2.5), eliminando errores humanos y acelerando los tiempos de auditoría.
+AEGIS: Red Horizon: El Cerebro Ofensivo C2 (Command & Control) asistido por IA para operaciones de Red Teaming y Ciberinteligencia.
 
----
+Red Horizon no fue creada para reemplazar al operador humano, sino para actuar como un Multiplicador de Fuerza. Es el núcleo de inteligencia (Google Gemini 2.5) que orquesta las manos del auditor, garantizando la agilidad en las 5 fases metodológicas del Pentesting:
 
-## 2. DECODIFICANDO LA IDENTIDAD VISUAL
+Reconocimiento: OSINT y mapeo de superficie.
 
-El logo, conocido en clave como **"The Red Singularity"**, no es un simple adorno; es la representación gráfica de la arquitectura del sistema.
+Escaneo y Enumeración: Identificación de puertos, servicios y vulnerabilidades.
 
-### 🛡️ 1. El Hexágono Glitcheado (Perímetro Roto)
-*   **Simbolismo:** En AURA GRC, el hexágono representaba la perfección de la defensa y la gobernanza. En Aura Ops, el hexágono aparece con líneas discontinuas y efectos de "glitch".
-*   **Significado:** Representa la **ruptura de la seguridad perimetral**. Es el objetivo final del Red Team: encontrar la grieta en la armadura perfecta, la vulnerabilidad que rompe la defensa.
+Explotación: Acceso inicial y compromiso.
 
-### 🔻 2. La Flecha Penetrante (Vector de Ataque)
-*   **Simbolismo:** Una forma triangular afilada y roja que atraviesa la estructura.
-*   **Significado:** Representa la **fuerza ofensiva** y la precisión quirúrgica. No es un ataque de fuerza bruta descontrolado, es una inyección de código dirigida al corazón del sistema objetivo.
+Post-Explotación y Borrado de Huellas: Escalada de privilegios, persistencia y eliminación de rastros.
 
-### 🧠 3. El Núcleo Pulsante (AI Core)
-*   **Simbolismo:** El punto de luz blanco en el centro exacto que late constantemente.
-*   **Significado:** Representa a **Gemini**, el cerebro vivo de la plataforma. Es el "ojo que todo lo ve", capaz de procesar datos de miles de puertos y vulnerabilidades en segundos para ofrecer inteligencia procesable.
+Reporte (Reporting & DFIR): Análisis forense y evidencias.
 
-### 🎨 4. El Degradado (Violeta a Rojo)
-*   **Simbolismo:** La transición de colores en el borde.
-*   **Significado:** Representa el viaje desde el **Conocimiento/Reconocimiento** (Violeta - Fase de Inteligencia) hasta la **Acción/Explotación** (Rojo - Fase de Ataque).
+2. DECODIFICANDO LA IDENTIDAD VISUAL
+El logo de Red Horizon fusiona la herencia de la familia AEGIS con la agresividad de las operaciones ofensivas.
 
----
+🛡️ El Escudo Robusto Central: Representa la herencia de AEGIS Vanguard Core y AEGIS Governance. El control absoluto de la información.
 
-## 3. MANUAL DE USO OPERATIVO
+📡 El Parche Táctico y Nodos: El fondo oscuro y segmentado simboliza la cartografía de la red (Recon) y la infraestructura de los Command & Control modernos.
 
-### 🚀 Fase 1: Despliegue (C2 Deployment)
+🔻 La Flecha Perforante (Red Horizon): Una línea roja que atraviesa el escudo de abajo hacia arriba. Representa el "Red Team": encontrar la vulnerabilidad, romper el perímetro y penetrar en la infraestructura del objetivo.
 
-Aura Ops está diseñada para ser agnóstica al sistema operativo. Funciona como un "Head-Up Display" en tu monitor principal, mientras ejecutas los ataques en tu terminal de combate.
+3. MANUAL DE USO OPERATIVO Y OPSEC
+🚀 Fase 1: Despliegue y Seguridad Operativa (OPSEC)
+Red Horizon opera bajo estrictos estándares de seguridad. No se guardan API Keys en el almacenamiento del navegador web para evitar fugas de credenciales.
 
-*   **Entornos Soportados:** Windows 11, Docker, Kali Linux, Parrot OS, macOS.
-*   **Puerto Estándar:** `TCP/1337` (Puerto Hacker).
-*   **Acceso:** Navegador Web (`http://localhost:1337`).
+Crea un archivo .env en la raíz del proyecto.
 
-### ⚙️ Fase 2: Configuración de Inteligencia
+Inyecta la credencial del núcleo de IA: VITE_GEMINI_API_KEY=tu_clave_aqui.
 
-Antes de iniciar una operación, el sistema debe ser armado con credenciales de inteligencia externa.
+Despliega la plataforma (start_aegis.bat en Windows, o start_aegis.sh en Linux/macOS). El sistema se levantará en el puerto táctico TCP/1337.
 
-1.  Accede al panel de **Configuración (Settings)** ⚙️.
-2.  Ingresa tus credenciales para:
-    *   **Shodan:** Para reconocimiento pasivo de infraestructura global.
-    *   **VirusTotal:** Para análisis de reputación de hash/dominios.
-    *   **WPScan:** Para inteligencia específica de CMS WordPress.
-3.  El sistema guardará estas llaves de forma segura en tu navegador (Persistencia Local).
+⚙️ Fase 2: El Panel de Control y el Botón del Pánico
+Al hacer clic en el engranaje de configuración ⚙️, accedes al panel OPSEC & SYSTEM:
 
-### ⚔️ Fase 3: Ciclo de Combate (The Loop)
+System Status: Verifica en tiempo real si el núcleo C2 y las variables de entorno están en línea, con acceso directo para generar nuevas API Keys.
 
-La plataforma opera bajo la doctrina **C2 (Command & Control)**:
+Cambio de Callsign: Cambia tu alias de operador al vuelo sin cerrar la sesión.
 
-1.  **SELECCIÓN DE VECTOR:**
-    *   Elige el módulo en la barra lateral (ej. *Cloud Security > AWS Audit* o *Intel > Nmap*).
-2.  **INICIALIZACIÓN:**
-    *   La IA te pedirá definir el **OBJETIVO (TARGET)**.
-    *   *Ejemplo:* "Target: 192.168.1.50" o "Dominio: example.com".
-3.  **GENERACIÓN DE ORDEN (C2):**
-    *   Aura Ops generará el comando de terminal óptimo, inyectando tus API Keys automáticamente si es necesario.
-    *   **ACCIÓN:** Haz clic en el botón `COPIAR` del bloque de comando.
-4.  **EJECUCIÓN EN CAMPO:**
-    *   Ve a tu terminal (Kali/Parrot).
-    *   Pega y ejecuta el comando.
-5.  **RETROALIMENTACIÓN DE INTELIGENCIA:**
-    *   Copia el resultado (output) de tu terminal.
-    *   Pégalo en el chat de Aura Ops.
-    *   **RESULTADO:** La IA analizará la salida, detectará vulnerabilidades críticas y sugerirá el siguiente vector de ataque (Pivoting).
+🚨 PANIC BUTTON: En caso de emergencia durante una auditoría o si el entorno está comprometido, pulsar este botón rojo purgará la caché, destruirá todas las sesiones activas en memoria y recargará la plataforma dejándola completamente en blanco.
 
-### 📄 Fase 4: Reporte y Evidencia
+⚔️ Fase 3: Ciclo de Combate Multisesión (The Loop)
+AEGIS opera con un sistema de Persistencia de Pestañas Paralelas. Puedes atacar múltiples frentes sin perder el hilo de pensamiento de la IA.
 
-El trabajo no termina con el hackeo; termina con el informe.
+SELECCIÓN DE VECTOR: Elige una herramienta (ej. Nmap).
 
-1.  Durante la sesión, Aura Ops recopila evidencias en segundo plano.
-2.  Haz clic en el botón **"GENERAR REPORTE"**.
-3.  El sistema compilará automáticamente un **Informe de Auditoría Profesional** incluyendo:
-    *   Resumen Ejecutivo para C-Level.
-    *   Hallazgos Técnicos clasificados por severidad (CVSS).
-    *   Pasos de Reproducción.
-    *   Recomendaciones de Remedición.
-4.  **Exportación:** Disponible en HTML interactivo, Word (.doc) editable y PDF.
+INICIALIZACIÓN Y ORDEN: Proporciona la IP del CTF o auditoría. La IA generará el comando de ejecución óptimo sin simulaciones.
 
----
+EJECUCIÓN EN CAMPO: Copia el comando, ejecútalo en tu terminal real (Kali/Parrot) y pega la salida de vuelta en AEGIS.
 
-## 4. ÁREAS DE OPERACIÓN (ARSENAL)
+MULTITASKING: Mientras Nmap escanea, abre "Ffuf" en el menú lateral. La plataforma abrirá una nueva sesión aislada para Ffuf. Puedes volver a Nmap en cualquier momento; la conversación estará exactamente donde la dejaste.
 
-El sistema cubre el espectro completo de operaciones Red Team:
+RESET: Utiliza el botón LIMPIAR (Icono de papelera) en la cabecera de la terminal para destruir el historial de esa herramienta específica e iniciar un nuevo escaneo desde cero.
 
-*   **INTELIGENCIA (RECON):** Nmap, Masscan, Shodan, OSINT, Wireshark.
-*   **BUG BOUNTY:** Reconocimiento masivo de subdominios y vulnerabilidades web automatizadas.
-*   **CLOUD SECURITY:** Auditoría ofensiva de entornos AWS (Pacu) y Azure.
-*   **MOBILE HACKING:** Análisis estático y dinámico de aplicaciones Android e iOS.
-*   **WEB HACKING:** Inyección SQL, XSS, CMS (WordPress), Proxies (Burp/Caido).
-*   **INFRAESTRUCTURA:** Active Directory, Kerberoasting, Escalada de Privilegios, Persistencia.
-*   **INGENIERÍA SOCIAL:** Preparación de campañas de Phishing y Payloads.
+📄 Fase 4: Reporte y Evidencia
+Acelera el proceso burocrático de la auditoría.
 
----
-*Documento confidencial generado por el Núcleo de Inteligencia Aura Ops.*
+Haz clic en el botón "REPORTE" en cualquier terminal activa.
+
+La IA compilará un Informe Profesional gerencial (Resumen Ejecutivo, CVSS, Remedición).
+
+Exporta el documento a PDF o Word, añade tus capturas de pantalla, y entrégalo al cliente.
+
+4. EL ARSENAL TÁCTICO
+AEGIS Red Horizon cubre el espectro completo de operaciones:
+
+🕵️ Inteligencia & OSINT: Sherlock, Maltego, Recon-ng, MISP Intel, Leaks.
+
+📚 Investigación de Vuln & CTI: SearchSploit / CVE, MITRE ATT&CK / OWASP, Calculadora CVSS.
+
+🎯 Recon & Bug Bounty: Nmap, Masscan, Subfinder, Httpx, Nuclei, Nessus.
+
+☁️ Cloud Security: Auditoría ofensiva AWS (Pacu) y Azure (AzureHound).
+
+📱 Mobile Hacking: Análisis estático y dinámico (MobSF, Frida).
+
+🛠️ Desarrollo & C2: Cobalt Strike, Sliver C2, Havoc, MSFVenom, Phishing.
+
+🌐 Ataques Web: Burp, WhatWeb, cURL, Wget, Nikto, Ffuf, SQLmap, WPScan, Commix.
+
+🔓 Acceso Inicial: Metasploit, Responder, Hashcat/John, Wifite, Bettercap.
+
+🚩 Post-Explotación: LinPEAS, BloodHound, CrackMapExec, Mimikatz, Persistencia.
+
+🔍 Forense & DFIR: Autopsy, Volatility 3 (Memoria RAM), Wireshark (PCAP).
+
+*Fin del documento. Operar con precaución.*
+
+<div align="center">
+  <br>
+  <h3>🕸️ <i>Y recuerda: ¡"Un gran poder conlleva una gran responsabilidad"!</i> 🕸️</h3>
+  <br>
+</div>
