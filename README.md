@@ -138,12 +138,14 @@ Botón del Pánico activado                 Si usaste el Panic Button, la caché
                                           Solo vuelve a ingresar tu alias para reconectar con el C2.
 
 📘 Documentación Oficial
-Para comprender la doctrina de uso, la filosofía de la arquitectura y el flujo del "Loop de Combate", consulta el manual operativo:
+Para comprender la doctrina de uso, la filosofía de la arquitectura y el flujo del "Loop de Combate", 
+consulta el manual operativo:
 
 👉 LEER MANUAL DE OPERACIONES Y DOCTRINA (MANUAL.md)
 
 ⚠️ Aviso Legal y Ética Operativa
-Esta herramienta ha sido desarrollada estrictamente para uso profesional en auditorías reales, entornos académicos, resolución de CTFs (Capture The Flag) y el estudio avanzado de la Ciberseguridad.
+Esta herramienta ha sido desarrollada estrictamente para uso profesional en auditorías reales, entornos académicos, 
+resolución de CTFs (Capture The Flag) y el estudio avanzado de la Ciberseguridad.
 
 El propósito de AEGIS: Red Horizon es actuar como un facilitador que agiliza las 5 fases metodológicas del Pentesting:
 
@@ -153,13 +155,17 @@ Escaneo y Enumeración: Identificación de puertos, servicios y vulnerabilidades
 
 Explotación: Acceso inicial y compromiso del sistema.
 
-Post-Explotación y Borrado de Huellas: Escalada de privilegios, persistencia, movimiento lateral y borrado de evidencias para no dejar rastros.
+Post-Explotación y Borrado de Huellas: Escalada de privilegios, persistencia, movimiento lateral y borrado de evidencias 
+para no dejar rastros.
 
 Reporte (Reporting & DFIR): Análisis forense y generación de evidencias documentales.
 
-El uso de este software para escanear, auditar o atacar infraestructura, redes o sistemas de información sin el consentimiento previo, explícito y por escrito de sus propietarios es un delito.
+El uso de este software para escanear, auditar o atacar infraestructura, redes o sistemas de información sin el consentimiento 
+previo, explícito y por escrito de sus propietarios es un delito.
 
-La responsabilidad absoluta del uso de las técnicas, comandos e inteligencia generada por esta plataforma recae íntegramente en la persona que lo opera. El creador de este proyecto no asumen ninguna responsabilidad por daños directos o indirectos causados por el mal uso de esta herramienta.
+La responsabilidad absoluta del uso de las técnicas, comandos e inteligencia generada por esta plataforma recae íntegramente 
+en la persona que lo opera. El creador de este proyecto no asumen ninguna responsabilidad por daños directos o indirectos 
+causados por el mal uso de esta herramienta.
 
 
 Fin del documento. Operar con precaución.
