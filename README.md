@@ -107,9 +107,12 @@ La forma más limpia y profesional.
 
 3. Acceso: Entra en tu navegador a http://localhost:1337
 
-Opción B: Windows / Linux (Local)
+Opción B: Ejecución Local Automatizada (Windows / Linux)
+El proyecto incluye scripts de inicialización que instalan las dependencias (si es la primera vez), levantan el servidor y abren 
+tu navegador de forma automática.
+
 1 Clonar el repositorio:
-    git clone [https://github.com/cwaly/AEGIS_RED_HORIZON.git](https://github.com/cwaly/AEGIS_RED_HORIZON.git)
+    git clone https://github.com/cwaly/AEGIS_RED_HORIZON.git
     cd AEGIS_RED_HORIZON
 
 2 Configurar Clave (.env):
@@ -118,28 +121,38 @@ Opción B: Windows / Linux (Local)
 
   - Añade tu credencial: VITE_GEMINI_API_KEY=tu_clave_aqui
 
-3 Instalar dependencias y Correr:
-    npm install
-    npm run dev
+3 Lanzar la plataforma:
 
-🔧 Solución de Problemas (Troubleshooting)
+  - En Windows: Haz doble clic sobre el archivo start_aegis.bat o ejecútalo desde tu consola.
+    Crear acceso directo al escritorio (Opcional)
+    Colocar el icono al acceso directo al escritorio, con la siguiente ruta del archivo (Unidad donde este alojada el repositorio 
+    descargado de GitHun\AEGIS_RED_HORIZON\public\AEGIS_Red_Horizon.ico)
+
+  - En Linux / macOS: Otorga permisos de ejecución al script bash y lánzalo con los siguientes comandos:
+    chmod +x start_aegis.sh
+    ./start_aegis.sh
+
+    Crear un lanzador, acceso directo al escritorio (Opcional)
+    Colocar el icono al acceso directo al escritorio, con la siguiente ruta del archivo (Unidad donde este alojada el repositorio 
+    descargado de GitHun\AEGIS_RED_HORIZON\public\AEGIS_Red_Horizon.ico)
+
+🔧 Solución de Problemas 
 
 Problema                                  Solución
------------------------------------------------------------------------------------------------------------------------
-sh: 1: vite: not found (Linux/Kali)       Error de permisos. Ejecuta:
+----------------------------------------------------------------------------------------------------------------------------------
+sh: 1: vite: not found (Linux/Kali)       Error de permisos. Ejecuta los siguientes comandos en orden:
                                           rm -rf node_modules package-lock.json
                                           npm install
                                           npm run dev
------------------------------------------------------------------------------------------------------------------------                                          
+----------------------------------------------------------------------------------------------------------------------------------                               
 IA no responde / No pasa de "READY"       Asegúrate de que tu archivo se llame exactamente .env y reinicia el servidor 
                                           (Ctrl+C y luego npm run dev).
------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------
 Botón del Pánico activado                 Si usaste el Panic Button, la caché se ha purgado. 
                                           Solo vuelve a ingresar tu alias para reconectar con el C2.
 
 📘 Documentación Oficial
-Para comprender la doctrina de uso, la filosofía de la arquitectura y el flujo del "Loop de Combate", 
-consulta el manual operativo:
+Para comprender la doctrina de uso, la filosofía de la arquitectura y el flujo del "Loop de Combate", consulta el manual operativo:
 
 👉 LEER MANUAL DE OPERACIONES Y DOCTRINA (MANUAL.md)
 
