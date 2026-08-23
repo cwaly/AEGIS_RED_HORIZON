@@ -1,4 +1,5 @@
 export enum ModuleCategory {
+  METHODOLOGY = 'METODOLOGÍA & PLAYBOOKS (OSCP/eJPT)',
   INTELLIGENCE = 'INTELIGENCIA & OSINT',
   VULN_RESEARCH = 'INVESTIGACIÓN DE VULN & CTI', // <--- NUEVA CATEGORÍA
   BUG_BOUNTY = 'RECON & BUG BOUNTY',
@@ -13,6 +14,11 @@ export enum ModuleCategory {
 }
 
 export enum ModuleType {
+  // Metodología & Playbooks (guías end-to-end estilo examen OSCP/eJPTv2)
+  PLAYBOOK_AD_ATTACK_PATH = 'PLAYBOOK_AD_ATTACK_PATH',
+  PLAYBOOK_PIVOTING = 'PLAYBOOK_PIVOTING',
+  PLAYBOOK_WEB_API = 'PLAYBOOK_WEB_API',
+
   // Intelligence & OSINT
   OSINT_SHERLOCK = 'OSINT_SHERLOCK',
   OSINT_MALTEGO = 'OSINT_MALTEGO',

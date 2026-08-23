@@ -93,6 +93,8 @@ Exporta el documento a PDF o Word, añade tus capturas de pantalla, y entrégalo
 4. EL ARSENAL TÁCTICO
 AEGIS Red Horizon cubre el espectro completo de operaciones:
 
+🎓 Metodología & Playbooks (OSCP/eJPTv2): AD Attack Path (recon → Kerberoasting/AS-REP → lateral movement → DCSync), Pivoting & Tunneling (Chisel, Ligolo-ng, SSH, proxychains, doble pivote), Web & API Methodology (mapeado a OWASP Top 10 / API Top 10). A diferencia de los módulos de herramienta individual, estos guían la operación completa fase por fase, confirmando en qué etapa estás antes de avanzar — la misma disciplina que evalúan las certificaciones.
+
 🕵️ Inteligencia & OSINT: Sherlock, Maltego, Recon-ng, MISP Intel, Leaks.
 
 📚 Investigación de Vuln & CTI: SearchSploit / CVE, MITRE ATT&CK / OWASP, Calculadora CVSS.

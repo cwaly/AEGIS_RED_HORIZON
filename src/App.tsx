@@ -10,11 +10,16 @@ import {
   Terminal as TerminalIcon, Settings, FileText, Menu, X, ChevronDown,
   ChevronRight, Shield, Wifi, Globe, Database, Lock, Server, Eye, Zap,
   Cpu, Bug, Smartphone, Cloud, Crosshair, Search, Key,
-  Radio, List, Activity, Target, ShieldAlert, FolderSearch, Fingerprint, Users, Home, LogOut, AlertTriangle, HardDrive
+  Radio, List, Activity, Target, ShieldAlert, FolderSearch, Fingerprint, Users, Home, LogOut, AlertTriangle, HardDrive, Route, GraduationCap
 } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 
 const TOOLS_CONFIG: Tool[] = [
+  // 🎓 Metodología & Playbooks (OSCP/eJPTv2)
+  { id: ModuleType.PLAYBOOK_AD_ATTACK_PATH, name: 'AD Attack Path', description: 'Playbook completo: recon → Kerberoasting → lateral → DCSync', icon: 'GraduationCap', category: ModuleCategory.METHODOLOGY },
+  { id: ModuleType.PLAYBOOK_PIVOTING, name: 'Pivoting & Tunneling', description: 'Chisel, Ligolo-ng, SSH, proxychains, doble pivote', icon: 'Route', category: ModuleCategory.METHODOLOGY },
+  { id: ModuleType.PLAYBOOK_WEB_API, name: 'Web & API Methodology', description: 'Metodología completa OWASP Top 10 / API Top 10', icon: 'Globe', category: ModuleCategory.METHODOLOGY },
+
   // 🕵️ Inteligencia & OSINT
   { id: ModuleType.OSINT_SHERLOCK, name: 'Sherlock', description: 'Búsqueda de Usuarios', icon: 'Search', category: ModuleCategory.INTELLIGENCE },
   { id: ModuleType.OSINT_MALTEGO, name: 'Maltego', description: 'Análisis de Enlaces', icon: 'Eye', category: ModuleCategory.INTELLIGENCE },
@@ -87,6 +92,7 @@ const TOOLS_CONFIG: Tool[] = [
 ];
 
 const CATEGORY_ACCENT: Record<ModuleCategory, string> = {
+  [ModuleCategory.METHODOLOGY]: '#facc15',
   [ModuleCategory.INTELLIGENCE]: '#22d3ee',
   [ModuleCategory.VULN_RESEARCH]: '#f59e0b',
   [ModuleCategory.BUG_BOUNTY]: '#f43f5e',
@@ -168,6 +174,7 @@ const App: FC = () => {
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({
+    [ModuleCategory.METHODOLOGY]: true,
     [ModuleCategory.INTELLIGENCE]: false,
     [ModuleCategory.VULN_RESEARCH]: false,
     [ModuleCategory.BUG_BOUNTY]: false,
@@ -184,7 +191,7 @@ const App: FC = () => {
   const toggleCategory = (cat: string) => setExpandedCategories(prev => ({...prev, [cat]: !prev[cat]}));
 
   const getIcon = (iconName: string) => {
-    const icons: any = { TerminalIcon, Globe, Eye, Wifi, Zap, Database, FileText, Shield, Lock, Server, Cpu, Bug, Smartphone, Cloud, Crosshair, Search, Key, Radio, List, Activity, Target, ShieldAlert, FolderSearch, Fingerprint, Users };
+    const icons: any = { TerminalIcon, Globe, Eye, Wifi, Zap, Database, FileText, Shield, Lock, Server, Cpu, Bug, Smartphone, Cloud, Crosshair, Search, Key, Radio, List, Activity, Target, ShieldAlert, FolderSearch, Fingerprint, Users, Route, GraduationCap };
     const Icon = icons[iconName] || TerminalIcon;
     return <Icon size={18} />;
   };

@@ -77,6 +77,7 @@ La plataforma se divide en componentes clave diseñados para maximizar la fluide
 
 ## ⚡ Capacidades del Arsenal
 
+- **🎓 Playbooks de Metodología (OSCP/eJPTv2):** Guías end-to-end paso a paso — AD Attack Path (recon → Kerberoasting → lateral → DCSync), Pivoting & Tunneling (Chisel, Ligolo-ng, SSH, proxychains, doble pivote) y Web & API Methodology (mapeado a OWASP Top 10 / API Top 10) — para afrontar certificaciones y CTFs con una metodología consistente, no solo comandos sueltos.
 - **🧠 IA Táctica Dual (Cloud + Local):** Motor conmutable desde el panel OPSEC — **☁️ Gemini 2.5** en la nube, o **🖥️ Ollama en local (sin censura)** para auditorías bajo NDA donde el tráfico no puede salir de tu máquina. Genera comandos precisos y analiza el *output* de la terminal sin alucinaciones.
 - **🔄 Persistencia Multisesión:** Abre múltiples herramientas en paralelo. El C2 mantiene el contexto de cada ataque en pestañas separadas, y el historial persiste aunque refresques el navegador.
 - **🔒 API Gateway Backend:** Las credenciales (`GEMINI_API_KEY`, Ollama) viven exclusivamente en un backend Express — **nunca** se inyectan en el bundle del navegador.
