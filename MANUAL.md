@@ -39,22 +39,34 @@ El logo de Red Horizon fusiona la herencia de la familia AEGIS con la agresivida
 
 3. MANUAL DE USO OPERATIVO Y OPSEC
 🚀 Fase 1: Despliegue y Seguridad Operativa (OPSEC)
-Red Horizon opera bajo estrictos estándares de seguridad. No se guardan API Keys en el almacenamiento del navegador web para evitar fugas de credenciales.
+Red Horizon opera bajo estrictos estándares de seguridad. Ninguna API Key toca jamás el navegador: viven exclusivamente en el AI Gateway (backend Express) que corre junto al frontend.
 
 Crea un archivo .env en la raíz del proyecto.
 
-Inyecta la credencial del núcleo de IA: VITE_GEMINI_API_KEY=tu_clave_aqui.
+Inyecta las credenciales que vayas a usar:
+- GEMINI_API_KEY=tu_clave_aqui (motor CLOUD)
+- OLLAMA_BASE_URL=http://127.0.0.1:11434 y OLLAMA_MODEL=dolphin3 (motor LOCAL, sin censura)
 
-Despliega la plataforma (start_aegis.bat en Windows, o start_aegis.sh en Linux/macOS). El sistema se levantará en el puerto táctico TCP/1337.
+Despliega la plataforma (start_aegis.bat en Windows, o start_aegis.sh en Linux/macOS). El sistema se levantará en el puerto táctico TCP/1337 (frontend), con el AI Gateway detrás en el puerto 4000 durante desarrollo.
+
+🧠 Fase 1.5: Doctrina Cloud vs Local
+AEGIS opera con dos núcleos de IA intercambiables en caliente desde el panel OPSEC:
+
+- ☁️ CLOUD (Gemini 2.5): máxima capacidad y velocidad. Úsalo en CTFs y entornos sin restricción contractual de datos.
+- 🖥️ LOCAL (Ollama, sin censura): todo el razonamiento ocurre en tu propia GPU, sin salir de tu red. Es el modo doctrinal correcto para auditorías reales bajo NDA, donde el target, los hallazgos y las credenciales del cliente NO pueden abandonar tu máquina. El modelo activo se configura vía OLLAMA_MODEL en .env — no requiere tocar código.
 
 ⚙️ Fase 2: El Panel de Control y el Botón del Pánico
 Al hacer clic en el engranaje de configuración ⚙️, accedes al panel OPSEC & SYSTEM:
 
-System Status: Verifica en tiempo real si el núcleo C2 y las variables de entorno están en línea, con acceso directo para generar nuevas API Keys.
+Conectividad del C2: Verifica en tiempo real el estado de AMBOS motores (Gemini y Ollama), con acceso directo para generar nuevas API Keys.
+
+Motor de IA Activo: Selector CLOUD / LOCAL — cambia el núcleo de razonamiento de toda la plataforma al instante.
+
+Idioma de la IA: ES/EN, aplicado a todas las respuestas del núcleo.
 
 Cambio de Callsign: Cambia tu alias de operador al vuelo sin cerrar la sesión.
 
-🚨 PANIC BUTTON: En caso de emergencia durante una auditoría o si el entorno está comprometido, pulsar este botón rojo purgará la caché, destruirá todas las sesiones activas en memoria y recargará la plataforma dejándola completamente en blanco.
+🚨 PANIC BUTTON: En caso de emergencia durante una auditoría o si el entorno está comprometido, pulsar este botón rojo purgará la caché, el historial de sesiones y recargará la plataforma dejándola completamente en blanco.
 
 ⚔️ Fase 3: Ciclo de Combate Multisesión (The Loop)
 AEGIS opera con un sistema de Persistencia de Pestañas Paralelas. Puedes atacar múltiples frentes sin perder el hilo de pensamiento de la IA.

@@ -1,21 +1,26 @@
-# 1. Usar una imagen base de Node.js ligera y segura (Alpine Linux)
-FROM node:20-alpine
-
-# 2. Crear el directorio de trabajo dentro del contenedor
+# ---- Etapa 1: Build del frontend (Vite) ----
+FROM node:20-alpine AS build
 WORKDIR /app
-
-# 3. Copiar los archivos de dependencias primero (para aprovechar la caché de Docker)
 COPY package.json package-lock.json* ./
-
-# 4. Instalar las dependencias
 RUN npm install
-
-# 5. Copiar el resto del código fuente al contenedor
 COPY . .
+RUN npm run build
+
+# ---- Etapa 2: Runtime (AI Gateway + estático de producción) ----
+FROM node:20-alpine AS runtime
+WORKDIR /app
+ENV NODE_ENV=production
+ENV PORT=1337
+
+# Solo dependencias necesarias en runtime (express, tsx, zod, etc. son "dependencies")
+COPY package.json package-lock.json* ./
+RUN npm install --omit=dev
+
+COPY --from=build /app/dist ./dist
+COPY server ./server
 
 # 6. Exponer el puerto hacker 1337
 EXPOSE 1337
 
-# 7. Comando para iniciar la aplicación
-# Usamos '--host' para permitir conexiones desde fuera del contenedor
-CMD ["npm", "run", "dev", "--", "--host"]
+# 7. El servidor Express sirve el build estático y expone /api (Gemini/Ollama)
+CMD ["npx", "tsx", "server/index.ts"]

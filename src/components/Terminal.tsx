@@ -1,16 +1,17 @@
 import { useEffect, useRef, useState, KeyboardEvent, ReactNode, FC } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { Message } from '../types';
-import { Send, Terminal as TerminalIcon, Copy, Check, FileText, AlertTriangle, Trash2 } from 'lucide-react';
+import { Message, AIProviderId } from '../types';
+import { Send, Terminal as TerminalIcon, Copy, Check, FileText, AlertTriangle, Trash2, Cloud, HardDrive } from 'lucide-react';
 
 interface TerminalProps {
   messages: Message[];
   onSendMessage: (text: string) => void;
   onGenerateReport: () => void;
-  onClearSession: () => void; // NUEVA PROPIEDAD
+  onClearSession: () => void;
   isLoading: boolean;
   activeModule: string;
   activeModuleName?: string;
+  activeProvider: AIProviderId;
 }
 
 const CodeBlock = ({ children, className }: { children: ReactNode, className?: string }) => {
@@ -46,7 +47,7 @@ const CodeBlock = ({ children, className }: { children: ReactNode, className?: s
     );
 };
 
-export const Terminal: FC<TerminalProps> = ({ messages, onSendMessage, onGenerateReport, onClearSession, isLoading, activeModule, activeModuleName }) => {
+export const Terminal: FC<TerminalProps> = ({ messages, onSendMessage, onGenerateReport, onClearSession, isLoading, activeModule, activeModuleName, activeProvider }) => {
   const [input, setInput] = useState('');
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -74,9 +75,18 @@ export const Terminal: FC<TerminalProps> = ({ messages, onSendMessage, onGenerat
       <div className="absolute inset-0 opacity-5 pointer-events-none bg-[linear-gradient(rgba(244,63,94,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(244,63,94,0.1)_1px,transparent_1px)] [background-size:20px_20px]"></div>
 
       <div className="p-4 border-b border-gray-800 flex items-center justify-between bg-surface/50 backdrop-blur-sm z-10">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
             <TerminalIcon size={18} className="text-rose-500 animate-pulse" />
             <span className="text-sm font-bold text-gray-300">AEGIS // {displayTitle}</span>
+            {activeProvider === 'gemini' ? (
+              <span className="hidden sm:flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-rose-400 bg-rose-500/10 border border-rose-500/40 px-2 py-0.5 rounded">
+                <Cloud size={11} /> Cloud
+              </span>
+            ) : (
+              <span className="hidden sm:flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-terminal bg-terminal/10 border border-terminal/40 px-2 py-0.5 rounded">
+                <HardDrive size={11} /> Local
+              </span>
+            )}
         </div>
         <div className="flex items-center gap-2">
              <button 

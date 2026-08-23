@@ -100,9 +100,7 @@ export interface Message {
   isCommand?: boolean;
 }
 
-export interface ApiKeys {
-  openai?: string;
-}
+export type AIProviderId = 'gemini' | 'ollama';
 
 export interface UserProfile {
   name: string;

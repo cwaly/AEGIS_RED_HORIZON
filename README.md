@@ -5,9 +5,10 @@
   <p><strong>Plataforma de Operaciones de Red Team Asistida por IA (C2 Intelligence Core)</strong></p>
 
   <p>
-    <a href="https://github.com/cwaly/AEGIS_RED_HORIZON/releases"><img src="https://img.shields.io/badge/version-1.0-blue.svg" alt="Version"></a>
+    <a href="https://github.com/cwaly/AEGIS_RED_HORIZON/releases"><img src="https://img.shields.io/badge/version-1.1-blue.svg" alt="Version"></a>
     <a href="https://docker.com"><img src="https://img.shields.io/badge/docker-ready-blue" alt="Docker"></a>
     <a href="https://img.shields.io/badge/AI-Gemini%202.5%20Flash-purple"><img src="https://img.shields.io/badge/AI-Gemini%202.5-purple" alt="AI"></a>
+    <a href="https://ollama.com"><img src="https://img.shields.io/badge/Local%20AI-Ollama%20Ready-10b981" alt="Local AI"></a>
   </p>
   
   <p><i>Un "Cerebro Digital" C2 para la orquestación avanzada de auditorías ofensivas, CTFs y análisis forense.</i></p>
@@ -76,9 +77,10 @@ La plataforma se divide en componentes clave diseñados para maximizar la fluide
 
 ## ⚡ Capacidades del Arsenal
 
-- **🧠 IA Táctica (Gemini 2.5):** Asistencia y guía paso a paso. Genera comandos precisos y analiza el *output* de la terminal sin alucinaciones.
-- **🔄 Persistencia Multisesión:** Abre múltiples herramientas en paralelo. El C2 mantendrá el contexto de cada ataque en pestañas separadas.
-- **🚨 OPSEC & Panic Button:** Arquitectura segura que lee credenciales desde `.env` (no en el navegador) y cuenta con un botón de borrado de emergencia de memoria (Wipe Data).
+- **🧠 IA Táctica Dual (Cloud + Local):** Motor conmutable desde el panel OPSEC — **☁️ Gemini 2.5** en la nube, o **🖥️ Ollama en local (sin censura)** para auditorías bajo NDA donde el tráfico no puede salir de tu máquina. Genera comandos precisos y analiza el *output* de la terminal sin alucinaciones.
+- **🔄 Persistencia Multisesión:** Abre múltiples herramientas en paralelo. El C2 mantiene el contexto de cada ataque en pestañas separadas, y el historial persiste aunque refresques el navegador.
+- **🔒 API Gateway Backend:** Las credenciales (`GEMINI_API_KEY`, Ollama) viven exclusivamente en un backend Express — **nunca** se inyectan en el bundle del navegador.
+- **🚨 OPSEC & Panic Button:** Panel de conectividad en tiempo real (Cloud/Local) y botón de borrado de emergencia de memoria (Wipe Data).
 - **📚 CTI & Análisis:** Búsqueda en Exploit-DB (SearchSploit), Mapeo MITRE ATT&CK y calculadora de criticidad CVSS interactiva.
 - **☁️ Cloud & Web Hacking:** Módulos para AWS (Pacu), AzureHound, Burp Suite, SQLmap y CLI Fingerprinting.
 - **📱 Mobile Hacking:** Análisis de aplicaciones Android/iOS (MobSF, Frida).
@@ -89,11 +91,29 @@ La plataforma se divide en componentes clave diseñados para maximizar la fluide
 
 ## 🛠️ Instalación y Despliegue
 
-### 🔑 Paso 0: Obtener la llave del Motor de IA (Requisito Indispensable)
-AEGIS Red Horizon utiliza Gemini 2.5 como su núcleo analítico. Para que funcione, necesitas una API Key (Google ofrece un *Tier Gratuito* excelente para desarrolladores y auditores).
+### 🧠 Dos motores de IA: Cloud y Local (sin censura)
+
+AEGIS Red Horizon corre sobre un **AI Gateway** propio (backend Express) que puede hablar con dos motores, conmutables en caliente desde el panel OPSEC & SYSTEM:
+
+- **☁️ CLOUD — Gemini 2.5 Flash:** rápido, sin requisitos de hardware, ideal para CTFs. Requiere API Key de Google.
+- **🖥️ LOCAL — Ollama (sin censura):** todo el tráfico de la auditoría se queda en tu máquina. Recomendado para engagements reales bajo NDA donde no puedes enviar datos del cliente a la nube. Requiere [Ollama](https://ollama.com) instalado y un modelo descargado.
+
+**Ninguna API Key viaja jamás al navegador** — vive únicamente en el backend (`server/`), leída de `.env`.
+
+### 🔑 Paso 0a: Motor Cloud — Gemini 2.5 (opcional si solo usarás LOCAL)
 1. Entra a [Google AI Studio](https://aistudio.google.com/app/apikey) con tu cuenta de Google.
 2. Haz clic en el botón azul **"Create API key"**.
-3. Copia la clave generada. La usarás en el archivo `.env` en los pasos siguientes.
+3. Copia la clave generada. La usarás en el archivo `.env` en los pasos siguientes (variable `GEMINI_API_KEY`).
+
+### 🖥️ Paso 0b: Motor Local — Ollama (opcional si solo usarás CLOUD)
+1. Instala [Ollama](https://ollama.com/download).
+2. Descarga el modelo por defecto — **Dolphin 3.0 (8B)**, sin censura, de la librería oficial de Ollama. Lo probamos en hardware de 12GB VRAM: responde en ~2-5s, no rechaza tareas de pentesting autorizado y no se cuelga:
+   ```bash
+   ollama pull dolphin3
+   ```
+3. Ajusta el modelo activo en `.env` con `OLLAMA_MODEL=<nombre-del-modelo>` en cualquier momento — no requiere tocar código. Alternativas que también funcionan bien: `llama3.1:8b` (más "neutro", no específicamente sin censura) o `dolphin-mixtral` (más grande, más capacidad, requiere más VRAM/RAM).
+
+   ⚠️ **Nota de compatibilidad:** evitamos recomendar WhiteRabbitNeo — probamos sus quantizaciones GGUF de la comunidad (13B y 7B) y ambas se colgaron generando indefinidamente, porque su Modelfile no trae configurado un *stop-token*. Si quieres experimentar con otros modelos "uncensored", prefiere los de la librería oficial de Ollama (como `dolphin3`) sobre quantizaciones sueltas de la comunidad.
 
 ### Opción A: Docker (Recomendada 🐳)
 La forma más limpia y profesional.
@@ -119,7 +139,12 @@ abren tu navegador de forma automática.
 
   - Crea un archivo .env en la raíz del proyecto.
 
-  - Añade tu credencial: VITE_GEMINI_API_KEY=tu_clave_aqui
+  - Añade las variables que necesites (todas server-side, ninguna llega al navegador):
+    ```
+    GEMINI_API_KEY=tu_clave_aqui
+    OLLAMA_BASE_URL=http://127.0.0.1:11434
+    OLLAMA_MODEL=dolphin3
+    ```
 
 3 Lanzar la plataforma:
 
@@ -147,6 +172,16 @@ sh: 1: vite: not found (Linux/Kali)       Error de permisos. Ejecuta los siguien
 ----------------------------------------------------------------------------------------------------------------------------------                               
 IA no responde / No pasa de "READY"       Asegúrate de que tu archivo se llame exactamente .env y reinicia el servidor 
                                           (Ctrl+C y luego npm run dev).
+----------------------------------------------------------------------------------------------------------------------------------
+Motor LOCAL da timeout / no responde      Revisa que "ollama serve" esté corriendo (curl http://127.0.0.1:11434/api/tags).
+                                          Si un modelo se queda colgado, ejecuta "ollama stop <modelo>". Si el problema
+                                          persiste con una quantización concreta, cambia OLLAMA_MODEL en .env por otra
+                                          (p. ej. dolphin3, que es el default probado, sin censura y estable).
+----------------------------------------------------------------------------------------------------------------------------------
+start_aegis no arranca / navegador        Los scripts detectan si los puertos 1337 o 4000 ya están ocupados (p. ej. una
+abre una página rota o de otro proyecto   instancia anterior que no cerró bien) y te muestran el proceso exacto que los
+                                          tiene tomados, con el comando para liberarlo (taskkill /F /PID en Windows,
+                                          kill en Linux/macOS). Ciérralo y vuelve a lanzar el script.
 ----------------------------------------------------------------------------------------------------------------------------------
 Botón del Pánico activado                 Si usaste el Panic Button, la caché se ha purgado. 
                                           Solo vuelve a ingresar tu alias para reconectar con el C2.

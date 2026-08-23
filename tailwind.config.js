@@ -20,14 +20,24 @@ export default {
       },
       animation: {
         'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        'glitch': 'glitch 1s linear infinite',
+        'glitch': 'glitch 0.4s linear',
+        'scan': 'scan 7s linear infinite',
+        'blink': 'blink 1s step-start infinite',
       },
       keyframes: {
         glitch: {
           '2%, 64%': { transform: 'translate(2px,0) skew(0deg)' },
           '4%, 60%': { transform: 'translate(-2px,0) skew(0deg)' },
           '62%': { transform: 'translate(0,0) skew(5deg)' },
-        }
+        },
+        scan: {
+          '0%': { transform: 'translateY(-100%)' },
+          '100%': { transform: 'translateY(100vh)' },
+        },
+        blink: {
+          '0%, 100%': { opacity: '1' },
+          '50%': { opacity: '0' },
+        },
       }
     },
   },
