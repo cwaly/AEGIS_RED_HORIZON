@@ -1,5 +1,5 @@
 import { useState, useEffect, FC, FormEvent } from 'react';
-import { ModuleType, Message, Tool, ModuleCategory, UserProfile, AuditReport, AIProviderId, Language, Engagement } from './types';
+import { ModuleType, Message, Tool, ModuleCategory, UserProfile, AuditReport, AIProviderId, Language, Engagement, BoardFinding, FindingStatus, Severity } from './types';
 import { initializeChat, sendMessage, generateReportData, toChatHistory, fetchHealth, HealthStatus } from './services/aiClient';
 import { Terminal } from './components/Terminal';
 import { Logo } from './components/Logo';
@@ -7,13 +7,14 @@ import { ReportModal } from './components/ReportModal';
 import { TacticalOverlay } from './components/TacticalOverlay';
 import { BootSequence } from './components/BootSequence';
 import { LinksPanel } from './components/LinksPanel';
+import { FindingsBoard } from './components/FindingsBoard';
 import { isEncryptionEnabled, setupEncryption, unlockEncryption, disableEncryption, wipeEncryptedData, encryptString, decryptString } from './services/vault';
 import {
   Terminal as TerminalIcon, Settings, FileText, Menu, X, ChevronDown,
   ChevronRight, Shield, Wifi, Globe, Database, Lock, Server, Eye, Zap,
   Cpu, Bug, Smartphone, Cloud, Crosshair, Search, Key,
   Radio, List, Activity, Target, ShieldAlert, FolderSearch, Fingerprint, Users, Home, LogOut, AlertTriangle, HardDrive, Route, GraduationCap, FlaskConical, Link2,
-  Briefcase, Plus, Trash2
+  Briefcase, Plus, Trash2, Kanban
 } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -125,6 +126,15 @@ const loadSessionsFromStorage = (): Record<string, Message[]> => {
 
 const sessionKey = (engagementId: string, module: string) => `${engagementId}::${module}`;
 
+const loadFindingsFromStorage = (): BoardFinding[] => {
+  try {
+    const saved = localStorage.getItem('aegis_findings');
+    return saved ? JSON.parse(saved) : [];
+  } catch {
+    return [];
+  }
+};
+
 // Un "engagement" agrupa las sesiones por target/cliente. Antes de que existiera este
 // concepto, las sesiones vivían en localStorage con el moduleId como clave plana; esta
 // migración las mueve una sola vez a un engagement por defecto sin perder el historial.
@@ -193,7 +203,7 @@ const App: FC = () => {
   }, []);
 
   const [loginName, setLoginName] = useState('');
-  const [currentView, setCurrentView] = useState<'dashboard' | 'module' | 'links'>('dashboard');
+  const [currentView, setCurrentView] = useState<'dashboard' | 'module' | 'links' | 'findings'>('dashboard');
   const [activeModule, setActiveModule] = useState<ModuleType>(ModuleType.RECON_NMAP);
 
   // Si el cifrado está activo, las sesiones/engagements viven cifrados en localStorage y
@@ -204,6 +214,7 @@ const App: FC = () => {
   const [engagements, setEngagements] = useState<Engagement[]>(initState.engagements);
   const [activeEngagementId, setActiveEngagementId] = useState<string>(initState.activeEngagementId);
   const [sessionsData, setSessionsData] = useState<Record<string, Message[]>>(initState.sessions);
+  const [findings, setFindings] = useState<BoardFinding[]>(() => (isEncryptionEnabled() ? [] : loadFindingsFromStorage()));
   const [engagementMenuOpen, setEngagementMenuOpen] = useState(false);
   const [newEngagementName, setNewEngagementName] = useState('');
 
@@ -225,6 +236,10 @@ const App: FC = () => {
     const json = JSON.stringify(data);
     localStorage.setItem('aegis_engagements', key ? await encryptString(key, json) : json);
   };
+  const persistFindings = async (data: BoardFinding[], key: CryptoKey | null) => {
+    const json = JSON.stringify(data);
+    localStorage.setItem('aegis_findings', key ? await encryptString(key, json) : json);
+  };
 
   useEffect(() => {
     if (!vaultUnlocked) return;
@@ -235,6 +250,11 @@ const App: FC = () => {
     if (!vaultUnlocked) return;
     void persistEngagements(engagements, vaultKey);
   }, [engagements, vaultUnlocked, vaultKey]);
+
+  useEffect(() => {
+    if (!vaultUnlocked) return;
+    void persistFindings(findings, vaultKey);
+  }, [findings, vaultUnlocked, vaultKey]);
 
   useEffect(() => {
     if (!vaultUnlocked || !activeEngagementId) return;
@@ -254,14 +274,19 @@ const App: FC = () => {
       }
       const rawSessions = localStorage.getItem('aegis_sessions');
       const rawEngagements = localStorage.getItem('aegis_engagements');
+      const rawFindings = localStorage.getItem('aegis_findings');
       let sessions: Record<string, Message[]> = {};
       let engs: Engagement[] = [];
+      let finds: BoardFinding[] = [];
       if (rawSessions) {
         sessions = JSON.parse(await decryptString(key, rawSessions));
         Object.values(sessions).forEach((msgs) => msgs.forEach((m) => { m.timestamp = new Date(m.timestamp); }));
       }
       if (rawEngagements) {
         engs = JSON.parse(await decryptString(key, rawEngagements));
+      }
+      if (rawFindings) {
+        finds = JSON.parse(await decryptString(key, rawFindings));
       }
       if (engs.length === 0) {
         engs = [{ id: uuidv4(), name: 'Engagement por defecto', createdAt: new Date().toISOString() }];
@@ -271,6 +296,7 @@ const App: FC = () => {
 
       setSessionsData(sessions);
       setEngagements(engs);
+      setFindings(finds);
       setActiveEngagementId(activeId);
       setVaultKey(key);
       setVaultUnlocked(true);
@@ -295,6 +321,7 @@ const App: FC = () => {
     const key = await setupEncryption(newPassphrase);
     await persistSessionsData(sessionsData, key);
     await persistEngagements(engagements, key);
+    await persistFindings(findings, key);
     setVaultKey(key);
     setEncryptionEnabledFlag(true);
     setNewPassphrase('');
@@ -305,6 +332,7 @@ const App: FC = () => {
     if (!window.confirm('Esto descifra tus datos y los deja en texto plano en este navegador. ¿Continuar?')) return;
     await persistSessionsData(sessionsData, null);
     await persistEngagements(engagements, null);
+    await persistFindings(findings, null);
     disableEncryption();
     setVaultKey(null);
     setEncryptionEnabledFlag(false);
@@ -460,10 +488,24 @@ const App: FC = () => {
       Object.keys(next).forEach(k => { if (k.startsWith(`${id}::`)) delete next[k]; });
       return next;
     });
+    setFindings(prev => prev.filter(f => f.engagementId !== id));
     if (activeEngagementId === id) {
       const remaining = engagements.filter(e => e.id !== id);
       setActiveEngagementId(remaining[0]?.id ?? '');
     }
+  };
+
+  const handleAddFinding = (title: string, severity: Severity) => {
+    const newFinding: BoardFinding = { id: uuidv4(), engagementId: activeEngagementId, title, severity, status: 'found', createdAt: new Date().toISOString() };
+    setFindings(prev => [...prev, newFinding]);
+  };
+
+  const handleMoveFinding = (id: string, status: FindingStatus) => {
+    setFindings(prev => prev.map(f => f.id === id ? { ...f, status } : f));
+  };
+
+  const handleDeleteFinding = (id: string) => {
+    setFindings(prev => prev.filter(f => f.id !== id));
   };
 
   const activeToolObj = TOOLS_CONFIG.find(t => t.id === activeModule);
@@ -752,6 +794,7 @@ const App: FC = () => {
         <div className="px-4 py-2 mt-2 space-y-1">
           <button onClick={() => setCurrentView('dashboard')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${currentView === 'dashboard' ? 'bg-rose-500/20 text-white border border-rose-500/50' : 'text-gray-400 hover:bg-white/5'}`}><Home size={18} /><span className="font-bold text-sm">DASHBOARD</span></button>
           <button onClick={() => setCurrentView('links')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${currentView === 'links' ? 'bg-rose-500/20 text-white border border-rose-500/50' : 'text-gray-400 hover:bg-white/5'}`}><Link2 size={18} /><span className="font-bold text-sm">RECURSOS & OSINT</span></button>
+          <button onClick={() => setCurrentView('findings')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${currentView === 'findings' ? 'bg-rose-500/20 text-white border border-rose-500/50' : 'text-gray-400 hover:bg-white/5'}`}><Kanban size={18} /><span className="font-bold text-sm">HALLAZGOS</span></button>
         </div>
         <nav className="flex-1 overflow-y-auto py-2 px-0 space-y-0 custom-scrollbar">
           {Object.values(ModuleCategory).map((category) => (
@@ -806,6 +849,14 @@ const App: FC = () => {
             </div>
         )}
         {currentView === 'links' && (<LinksPanel />)}
+        {currentView === 'findings' && (
+          <FindingsBoard
+            findings={findings.filter(f => f.engagementId === activeEngagementId)}
+            onAdd={handleAddFinding}
+            onMove={handleMoveFinding}
+            onDelete={handleDeleteFinding}
+          />
+        )}
         {currentView === 'module' && (<Terminal messages={currentMessages} onSendMessage={handleUserMessage} onGenerateReport={handleGenerateReport} onClearSession={handleClearSession} isLoading={isLoading} activeModule={activeModule} activeModuleName={activeToolName} activeProvider={aiProvider} />)}
       </main>
     </div>

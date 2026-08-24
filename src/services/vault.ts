@@ -92,5 +92,6 @@ export function wipeEncryptedData(): void {
   localStorage.removeItem('aegis_sessions');
   localStorage.removeItem('aegis_engagements');
   localStorage.removeItem('aegis_active_engagement');
+  localStorage.removeItem('aegis_findings');
   disableEncryption();
 }

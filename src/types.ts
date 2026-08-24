@@ -132,11 +132,25 @@ export interface EvidenceImage {
   caption: string;
 }
 
+export type Severity = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW' | 'INFO';
+
 export interface AuditFinding {
-  severity: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW' | 'INFO';
+  severity: Severity;
   title: string;
   description: string;
   remediation: string;
+}
+
+export type FindingStatus = 'found' | 'verifying' | 'reported';
+
+export interface BoardFinding {
+  id: string;
+  engagementId: string;
+  title: string;
+  severity: Severity;
+  status: FindingStatus;
+  notes?: string;
+  createdAt: string;
 }
 
 export interface AuditReport {
