@@ -8,6 +8,8 @@ import { TacticalOverlay } from './components/TacticalOverlay';
 import { BootSequence } from './components/BootSequence';
 import { LinksPanel } from './components/LinksPanel';
 import { FindingsBoard } from './components/FindingsBoard';
+import { SplitTerminalView } from './components/SplitTerminalView';
+import { sessionKey } from './utils/sessionKey';
 import { isEncryptionEnabled, setupEncryption, unlockEncryption, disableEncryption, wipeEncryptedData, encryptString, decryptString } from './services/vault';
 import {
   Terminal as TerminalIcon, Settings, FileText, Menu, X, ChevronDown,
@@ -124,8 +126,6 @@ const loadSessionsFromStorage = (): Record<string, Message[]> => {
   }
 };
 
-const sessionKey = (engagementId: string, module: string) => `${engagementId}::${module}`;
-
 const loadFindingsFromStorage = (): BoardFinding[] => {
   try {
     const saved = localStorage.getItem('aegis_findings');
@@ -205,6 +205,8 @@ const App: FC = () => {
   const [loginName, setLoginName] = useState('');
   const [currentView, setCurrentView] = useState<'dashboard' | 'module' | 'links' | 'findings'>('dashboard');
   const [activeModule, setActiveModule] = useState<ModuleType>(ModuleType.RECON_NMAP);
+  const [splitView, setSplitView] = useState(false);
+  const [splitPaneModules, setSplitPaneModules] = useState<ModuleType[]>([ModuleType.RECON_NMAP, ModuleType.PRIV_ESC]);
 
   // Si el cifrado está activo, las sesiones/engagements viven cifrados en localStorage y
   // no se pueden leer de forma síncrona al montar (hace falta la passphrase primero) —
@@ -338,7 +340,11 @@ const App: FC = () => {
     setEncryptionEnabledFlag(false);
   };
 
-  const [isLoading, setIsLoading] = useState(false);
+  // Loading por sesión (engagement+módulo), no global — así una terminal puede seguir
+  // esperando respuesta de la IA mientras el operador trabaja en otro panel de la vista
+  // dividida sin que el input de ese otro panel se bloquee.
+  const [loadingKeys, setLoadingKeys] = useState<Record<string, boolean>>({});
+  const setKeyLoading = (key: string, val: boolean) => setLoadingKeys(prev => ({ ...prev, [key]: val }));
   const [reportData, setReportData] = useState<AuditReport | null>(null);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -389,84 +395,116 @@ const App: FC = () => {
   };
 
   const runInitFlow = async (engagementId: string, module: ModuleType) => {
-    setIsLoading(true);
+    const key = sessionKey(engagementId, module);
+    setKeyLoading(key, true);
     try {
       const reply = await initializeChat(module, aiProvider, language);
       addMessage(engagementId, module, reply, 'model');
     } catch (e) {
       addMessage(engagementId, module, `Error crítico: Fallo en inicialización de IA (${aiProvider === 'gemini' ? 'Gemini' : 'Ollama Local'}). Verifica el motor en OPSEC & SYSTEM.`, 'system');
     } finally {
-      setIsLoading(false);
+      setKeyLoading(key, false);
+    }
+  };
+
+  const ensureSessionStarted = (engagementId: string, module: ModuleType) => {
+    const key = sessionKey(engagementId, module);
+    if (!sessionsData[key] || sessionsData[key].length === 0) {
+      void runInitFlow(engagementId, module);
     }
   };
 
   const handleModuleSelect = (module: ModuleType) => {
     setActiveModule(module);
     setCurrentView('module');
-
-    const key = sessionKey(activeEngagementId, module);
-    if (sessionsData[key] && sessionsData[key].length > 0) {
-        return;
-    }
-
-    void runInitFlow(activeEngagementId, module);
+    ensureSessionStarted(activeEngagementId, module);
   };
 
-  const handleUserMessage = async (text: string) => {
-    const currentMod = activeModule;
+  const sendMessageForModule = async (module: ModuleType, text: string) => {
     const currentEng = activeEngagementId;
-    const history = toChatHistory(sessionsData[sessionKey(currentEng, currentMod)] || []);
-    addMessage(currentEng, currentMod, text, 'user');
-    setIsLoading(true);
+    const key = sessionKey(currentEng, module);
+    const history = toChatHistory(sessionsData[key] || []);
+    addMessage(currentEng, module, text, 'user');
+    setKeyLoading(key, true);
     try {
-      const response = await sendMessage(currentMod, aiProvider, language, history, text);
-      addMessage(currentEng, currentMod, response, 'model');
+      const response = await sendMessage(module, aiProvider, language, history, text);
+      addMessage(currentEng, module, response, 'model');
     } catch (e) {
-      addMessage(currentEng, currentMod, "Error de conexión con el núcleo de IA.", 'system');
+      addMessage(currentEng, module, "Error de conexión con el núcleo de IA.", 'system');
     } finally {
-      setIsLoading(false);
+      setKeyLoading(key, false);
     }
   };
+  const handleUserMessage = (text: string) => { void sendMessageForModule(activeModule, text); };
 
-  const handleGenerateReport = async () => {
-    const currentMod = activeModule;
+  const generateReportForModule = async (module: ModuleType) => {
     const currentEng = activeEngagementId;
-    setIsLoading(true);
-    addMessage(currentEng, currentMod, "Iniciando compilación de evidencias...", 'system');
+    const key = sessionKey(currentEng, module);
+    setKeyLoading(key, true);
+    addMessage(currentEng, module, "Iniciando compilación de evidencias...", 'system');
     try {
-        const history = toChatHistory(sessionsData[sessionKey(currentEng, currentMod)] || []);
-        const report = await generateReportData(currentMod, aiProvider, language, history, userProfile?.name || 'Unknown');
+        const history = toChatHistory(sessionsData[key] || []);
+        const report = await generateReportData(module, aiProvider, language, history, userProfile?.name || 'Unknown');
         if (report) {
             setReportData(report);
             setIsReportModalOpen(true);
-            addMessage(currentEng, currentMod, "Reporte generado exitosamente.", 'system');
+            addMessage(currentEng, module, "Reporte generado exitosamente.", 'system');
         } else {
-            addMessage(currentEng, currentMod, "Error generando reporte: La IA no devolvió datos estructurados válidos.", 'system');
+            addMessage(currentEng, module, "Error generando reporte: La IA no devolvió datos estructurados válidos.", 'system');
         }
     } catch (e) {
-        addMessage(currentEng, currentMod, "Error crítico al generar reporte.", 'system');
+        addMessage(currentEng, module, "Error crítico al generar reporte.", 'system');
     } finally {
-        setIsLoading(false);
+        setKeyLoading(key, false);
     }
   };
+  const handleGenerateReport = () => { void generateReportForModule(activeModule); };
 
-  const handleClearSession = async () => {
-    const key = sessionKey(activeEngagementId, activeModule);
+  const clearSessionForModule = async (module: ModuleType) => {
+    const key = sessionKey(activeEngagementId, module);
     setSessionsData(prev => ({ ...prev, [key]: [] }));
-    await runInitFlow(activeEngagementId, activeModule);
+    await runInitFlow(activeEngagementId, module);
   };
+  const handleClearSession = () => { void clearSessionForModule(activeModule); };
 
   const activeEngagement = engagements.find(e => e.id === activeEngagementId);
 
   const handleSwitchEngagement = (id: string) => {
     setActiveEngagementId(id);
     setEngagementMenuOpen(false);
-    if (currentView === 'module') {
-      const key = sessionKey(id, activeModule);
-      if (!sessionsData[key] || sessionsData[key].length === 0) {
-        void runInitFlow(id, activeModule);
-      }
+    if (currentView !== 'module') return;
+    if (splitView) {
+      splitPaneModules.forEach(m => ensureSessionStarted(id, m));
+    } else {
+      ensureSessionStarted(id, activeModule);
     }
+  };
+
+  const handleEnterSplitView = () => {
+    setSplitView(true);
+    splitPaneModules.forEach(m => ensureSessionStarted(activeEngagementId, m));
+  };
+
+  const handleExitSplitView = () => setSplitView(false);
+
+  const handleChangePaneModule = (paneIndex: number, module: ModuleType) => {
+    setSplitPaneModules(prev => prev.map((m, i) => i === paneIndex ? module : m));
+    ensureSessionStarted(activeEngagementId, module);
+  };
+
+  const handleAddPane = () => {
+    if (splitPaneModules.length >= 3) return;
+    const unused = TOOLS_CONFIG.map(t => t.id).find(id => !splitPaneModules.includes(id)) || ModuleType.RECON_NMAP;
+    setSplitPaneModules(prev => [...prev, unused]);
+    ensureSessionStarted(activeEngagementId, unused);
+  };
+
+  const handleRemovePane = (index: number) => {
+    if (splitPaneModules.length <= 2) {
+      setSplitView(false);
+      return;
+    }
+    setSplitPaneModules(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleCreateEngagement = () => {
@@ -512,6 +550,7 @@ const App: FC = () => {
   const activeToolName = activeToolObj ? activeToolObj.name.toUpperCase() : activeModule;
 
   const currentMessages = sessionsData[sessionKey(activeEngagementId, activeModule)] || [];
+  const currentIsLoading = !!loadingKeys[sessionKey(activeEngagementId, activeModule)];
 
   if (!vaultUnlocked) {
     return (
@@ -859,7 +898,36 @@ const App: FC = () => {
             onDelete={handleDeleteFinding}
           />
         )}
-        {currentView === 'module' && (<Terminal messages={currentMessages} onSendMessage={handleUserMessage} onGenerateReport={handleGenerateReport} onClearSession={handleClearSession} isLoading={isLoading} activeModule={activeModule} activeModuleName={activeToolName} activeProvider={aiProvider} />)}
+        {currentView === 'module' && !splitView && (
+          <Terminal
+            messages={currentMessages}
+            onSendMessage={handleUserMessage}
+            onGenerateReport={handleGenerateReport}
+            onClearSession={handleClearSession}
+            onEnterSplitView={handleEnterSplitView}
+            isLoading={currentIsLoading}
+            activeModule={activeModule}
+            activeModuleName={activeToolName}
+            activeProvider={aiProvider}
+          />
+        )}
+        {currentView === 'module' && splitView && (
+          <SplitTerminalView
+            paneModules={splitPaneModules}
+            toolsConfig={TOOLS_CONFIG}
+            sessionsData={sessionsData}
+            loadingKeys={loadingKeys}
+            activeEngagementId={activeEngagementId}
+            activeProvider={aiProvider}
+            onChangePaneModule={handleChangePaneModule}
+            onSendMessage={sendMessageForModule}
+            onGenerateReport={generateReportForModule}
+            onClearSession={clearSessionForModule}
+            onAddPane={handleAddPane}
+            onRemovePane={handleRemovePane}
+            onExit={handleExitSplitView}
+          />
+        )}
       </main>
     </div>
   );

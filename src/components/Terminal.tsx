@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState, KeyboardEvent, ReactNode, FC } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Message, AIProviderId } from '../types';
-import { Send, Terminal as TerminalIcon, Copy, Check, FileText, AlertTriangle, Trash2, Cloud, HardDrive } from 'lucide-react';
+import { Send, Terminal as TerminalIcon, Copy, Check, FileText, AlertTriangle, Trash2, Cloud, HardDrive, Columns2 } from 'lucide-react';
 
 interface TerminalProps {
   messages: Message[];
   onSendMessage: (text: string) => void;
   onGenerateReport: () => void;
   onClearSession: () => void;
+  onEnterSplitView?: () => void;
   isLoading: boolean;
   activeModule: string;
   activeModuleName?: string;
@@ -47,7 +48,7 @@ const CodeBlock = ({ children, className }: { children: ReactNode, className?: s
     );
 };
 
-export const Terminal: FC<TerminalProps> = ({ messages, onSendMessage, onGenerateReport, onClearSession, isLoading, activeModule, activeModuleName, activeProvider }) => {
+export const Terminal: FC<TerminalProps> = ({ messages, onSendMessage, onGenerateReport, onClearSession, onEnterSplitView, isLoading, activeModule, activeModuleName, activeProvider }) => {
   const [input, setInput] = useState('');
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -89,7 +90,18 @@ export const Terminal: FC<TerminalProps> = ({ messages, onSendMessage, onGenerat
             )}
         </div>
         <div className="flex items-center gap-2">
-             <button 
+             {onEnterSplitView && (
+               <button
+                  onClick={onEnterSplitView}
+                  className="flex items-center gap-2 text-xs bg-gray-800/50 hover:bg-terminal/20 text-gray-400 hover:text-terminal border border-gray-700 hover:border-terminal/50 px-3 py-1 rounded transition-colors"
+                  title="Vista dividida: trabaja en varias terminales a la vez"
+                  aria-label="Activar vista dividida"
+               >
+                  <Columns2 size={14} />
+                  <span className="hidden md:inline">VISTA DIVIDIDA</span>
+               </button>
+             )}
+             <button
                 onClick={onClearSession}
                 className="flex items-center gap-2 text-xs bg-gray-800/50 hover:bg-red-500/20 text-gray-400 hover:text-red-500 border border-gray-700 hover:border-red-500/50 px-3 py-1 rounded transition-colors"
                 title="Limpiar terminal e iniciar nueva auditoría"
