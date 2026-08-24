@@ -16,7 +16,7 @@ import {
   ChevronRight, Shield, Wifi, Globe, Database, Lock, Server, Eye, Zap,
   Cpu, Bug, Smartphone, Cloud, Crosshair, Search, Key,
   Radio, List, Activity, Target, ShieldAlert, FolderSearch, Fingerprint, Users, Home, LogOut, AlertTriangle, HardDrive, Route, GraduationCap, FlaskConical, Link2,
-  Briefcase, Plus, Trash2, Kanban
+  Briefcase, Plus, Trash2, Kanban, Download, Upload
 } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -533,6 +533,63 @@ const App: FC = () => {
     }
   };
 
+  const handleExportEngagement = (id: string) => {
+    const eng = engagements.find(e => e.id === id);
+    if (!eng) return;
+    const sessions: Record<string, Message[]> = {};
+    Object.entries(sessionsData).forEach(([key, msgs]) => {
+      if (key.startsWith(`${id}::`)) sessions[key] = msgs;
+    });
+    const engFindings = findings.filter(f => f.engagementId === id);
+    const bundle = {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      engagement: eng,
+      sessions,
+      findings: engFindings,
+    };
+    const blob = new Blob([JSON.stringify(bundle, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `AEGIS_ENGAGEMENT_${eng.name.replace(/\s+/g, '_')}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImportEngagementFile = (file: File) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const bundle = JSON.parse(reader.result as string) as {
+          engagement: Engagement;
+          sessions: Record<string, Message[]>;
+          findings: BoardFinding[];
+        };
+        if (!bundle.engagement?.name || !bundle.sessions || !bundle.findings) {
+          throw new Error('invalid shape');
+        }
+        const newId = uuidv4();
+        const newEngagement: Engagement = { ...bundle.engagement, id: newId, name: `${bundle.engagement.name} (importado)` };
+        const remappedSessions: Record<string, Message[]> = {};
+        Object.entries(bundle.sessions).forEach(([key, msgs]) => {
+          const moduleId = key.split('::')[1] || key;
+          remappedSessions[sessionKey(newId, moduleId)] = msgs.map(m => ({ ...m, timestamp: new Date(m.timestamp) }));
+        });
+        const remappedFindings: BoardFinding[] = bundle.findings.map(f => ({ ...f, id: uuidv4(), engagementId: newId }));
+
+        setEngagements(prev => [...prev, newEngagement]);
+        setSessionsData(prev => ({ ...prev, ...remappedSessions }));
+        setFindings(prev => [...prev, ...remappedFindings]);
+        setActiveEngagementId(newId);
+        setEngagementMenuOpen(false);
+      } catch {
+        window.alert('El archivo no es un export válido de un engagement de AEGIS.');
+      }
+    };
+    reader.readAsText(file);
+  };
+
   const handleAddFinding = (title: string, severity: Severity) => {
     const newFinding: BoardFinding = { id: uuidv4(), engagementId: activeEngagementId, title, severity, status: 'found', createdAt: new Date().toISOString() };
     setFindings(prev => [...prev, newFinding]);
@@ -544,6 +601,37 @@ const App: FC = () => {
 
   const handleDeleteFinding = (id: string) => {
     setFindings(prev => prev.filter(f => f.id !== id));
+  };
+
+  const handleUpdateFinding = (id: string, updates: Partial<Pick<BoardFinding, 'description' | 'remediation'>>) => {
+    setFindings(prev => prev.map(f => f.id === id ? { ...f, ...updates } : f));
+  };
+
+  // Arma el reporte directo desde los hallazgos ya marcados "Reportado" en el tablero,
+  // sin volver a llamar a la IA — cierra el loop encontrar → trackear → reportar en vez
+  // de que el reporte tenga que re-inferir todo releyendo la conversación desde cero.
+  const handleGenerateReportFromFindings = () => {
+    const reported = findings.filter(f => f.engagementId === activeEngagementId && f.status === 'reported');
+    if (reported.length === 0) {
+      window.alert('No hay hallazgos en la columna "Reportado" todavía. Mueve al menos uno antes de generar el reporte.');
+      return;
+    }
+    const report: AuditReport = {
+      title: `Informe de Hallazgos — ${activeEngagement?.name || 'Engagement'}`,
+      target: activeEngagement?.target || activeEngagement?.name || 'N/A',
+      date: new Date().toLocaleDateString(),
+      auditor: userProfile?.name || 'Unknown',
+      executiveSummary: `Este informe documenta ${reported.length} hallazgo(s) identificados y verificados durante el engagement "${activeEngagement?.name}".`,
+      findings: reported.map(f => ({
+        severity: f.severity,
+        title: f.title,
+        description: f.description?.trim() || 'Pendiente de documentar la descripción técnica de este hallazgo.',
+        remediation: f.remediation?.trim() || 'Pendiente de documentar la remediación recomendada.',
+      })),
+      conclusion: 'Se recomienda remediar los hallazgos listados según su severidad y realizar una reauditoría de verificación tras la corrección.',
+    };
+    setReportData(report);
+    setIsReportModalOpen(true);
   };
 
   const activeToolObj = TOOLS_CONFIG.find(t => t.id === activeModule);
@@ -812,6 +900,7 @@ const App: FC = () => {
               {engagements.map(eng => (
                 <div key={eng.id} className={`flex items-center justify-between gap-2 px-2 py-1.5 rounded ${eng.id === activeEngagementId ? 'bg-rose-500/10 text-white' : 'text-gray-400 hover:bg-white/5'}`}>
                   <button onClick={() => handleSwitchEngagement(eng.id)} className="flex-1 text-left text-xs truncate">{eng.name}</button>
+                  <button onClick={() => handleExportEngagement(eng.id)} title="Exportar este engagement como JSON (backup)" aria-label="Exportar engagement" className="text-gray-600 hover:text-terminal shrink-0"><Download size={12} /></button>
                   {engagements.length > 1 && (
                     <button onClick={() => handleDeleteEngagement(eng.id)} title="Eliminar engagement" aria-label="Eliminar engagement" className="text-gray-600 hover:text-red-500 shrink-0"><Trash2 size={12} /></button>
                   )}
@@ -828,6 +917,20 @@ const App: FC = () => {
                   className="flex-1 bg-black/40 border border-gray-700 text-white text-xs px-2 py-1.5 rounded focus:border-rose-500 focus:outline-none"
                 />
                 <button onClick={handleCreateEngagement} title="Crear engagement" aria-label="Crear engagement" className="px-2 bg-rose-600 hover:bg-rose-500 text-white rounded transition-colors"><Plus size={14} /></button>
+              </div>
+              <div className="pt-1">
+                <label
+                  title="Importar un engagement desde un archivo JSON exportado previamente"
+                  className="w-full flex items-center justify-center gap-2 px-2 py-1.5 bg-gray-800/50 hover:bg-terminal/20 text-gray-400 hover:text-terminal border border-gray-700 hover:border-terminal/50 rounded text-xs cursor-pointer transition-colors"
+                >
+                  <Upload size={12} /> Importar engagement (JSON)
+                  <input
+                    type="file"
+                    accept="application/json"
+                    className="hidden"
+                    onChange={(e) => { if (e.target.files?.[0]) handleImportEngagementFile(e.target.files[0]); e.target.value = ''; }}
+                  />
+                </label>
               </div>
             </div>
           )}
@@ -896,6 +999,8 @@ const App: FC = () => {
             onAdd={handleAddFinding}
             onMove={handleMoveFinding}
             onDelete={handleDeleteFinding}
+            onUpdate={handleUpdateFinding}
+            onGenerateReport={handleGenerateReportFromFindings}
           />
         )}
         {currentView === 'module' && !splitView && (

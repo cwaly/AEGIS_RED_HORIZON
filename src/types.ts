@@ -149,7 +149,8 @@ export interface BoardFinding {
   title: string;
   severity: Severity;
   status: FindingStatus;
-  notes?: string;
+  description?: string;
+  remediation?: string;
   createdAt: string;
 }
 
