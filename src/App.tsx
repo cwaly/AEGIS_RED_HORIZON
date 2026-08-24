@@ -573,13 +573,15 @@ const App: FC = () => {
       {isReportModalOpen && reportData && (<ReportModal report={reportData} onClose={() => setIsReportModalOpen(false)} />)}
       {settingsOpen && (
         <div className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-surface border border-gray-700 p-6 rounded-lg w-full max-w-md shadow-2xl relative">
-            <button onClick={() => setSettingsOpen(false)} title="Cerrar panel" aria-label="Cerrar panel" className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"><X /></button>
-            <h2 className="text-xl font-bold mb-6 flex items-center gap-2 text-rose-500">
-                <Settings size={20} /> OPSEC & SYSTEM
-            </h2>
+          <div className="bg-surface border border-gray-700 rounded-lg w-full max-w-md shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <div className="sticky top-0 z-10 bg-surface p-6 pb-4 border-b border-gray-800">
+                <button onClick={() => setSettingsOpen(false)} title="Cerrar panel" aria-label="Cerrar panel" className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"><X /></button>
+                <h2 className="text-xl font-bold flex items-center gap-2 text-rose-500">
+                    <Settings size={20} /> OPSEC & SYSTEM
+                </h2>
+            </div>
 
-            <div className="space-y-6">
+            <div className="space-y-6 p-6 pt-4">
                 {/* 1. System Status */}
                 <div className="bg-[#0a0a0c] border border-gray-800 p-4 rounded-lg shadow-inner">
                     <h3 className="text-[10px] text-gray-500 font-bold tracking-widest mb-3 uppercase">Conectividad del C2</h3>
