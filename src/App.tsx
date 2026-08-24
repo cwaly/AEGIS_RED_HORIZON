@@ -10,15 +10,23 @@ import {
   Terminal as TerminalIcon, Settings, FileText, Menu, X, ChevronDown,
   ChevronRight, Shield, Wifi, Globe, Database, Lock, Server, Eye, Zap,
   Cpu, Bug, Smartphone, Cloud, Crosshair, Search, Key,
-  Radio, List, Activity, Target, ShieldAlert, FolderSearch, Fingerprint, Users, Home, LogOut, AlertTriangle, HardDrive, Route, GraduationCap
+  Radio, List, Activity, Target, ShieldAlert, FolderSearch, Fingerprint, Users, Home, LogOut, AlertTriangle, HardDrive, Route, GraduationCap, FlaskConical
 } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 
 const TOOLS_CONFIG: Tool[] = [
-  // 🎓 Metodología & Playbooks (OSCP/eJPTv2)
-  { id: ModuleType.PLAYBOOK_AD_ATTACK_PATH, name: 'AD Attack Path', description: 'Playbook completo: recon → Kerberoasting → lateral → DCSync', icon: 'GraduationCap', category: ModuleCategory.METHODOLOGY },
-  { id: ModuleType.PLAYBOOK_PIVOTING, name: 'Pivoting & Tunneling', description: 'Chisel, Ligolo-ng, SSH, proxychains, doble pivote', icon: 'Route', category: ModuleCategory.METHODOLOGY },
-  { id: ModuleType.PLAYBOOK_WEB_API, name: 'Web & API Methodology', description: 'Metodología completa OWASP Top 10 / API Top 10', icon: 'Globe', category: ModuleCategory.METHODOLOGY },
+  // 🎓 Metodología & Playbooks (certificaciones)
+  { id: ModuleType.PLAYBOOK_AD_ATTACK_PATH, name: 'AD Attack Path', description: 'Recon → Kerberoasting → lateral → DCSync · OSCP · CRTP · CRTE', icon: 'GraduationCap', category: ModuleCategory.METHODOLOGY },
+  { id: ModuleType.PLAYBOOK_PIVOTING, name: 'Pivoting & Tunneling', description: 'Chisel, Ligolo-ng, SSH, proxychains · OSCP · CRTO', icon: 'Route', category: ModuleCategory.METHODOLOGY },
+  { id: ModuleType.PLAYBOOK_WEB_API, name: 'Web & API Methodology', description: 'OWASP Top 10 / API Top 10 · OSWE · eWPT · CPTS · BSCP', icon: 'Globe', category: ModuleCategory.METHODOLOGY },
+  { id: ModuleType.PLAYBOOK_PRIVESC, name: 'Privilege Escalation', description: 'Windows & Linux, checklist completa · OSCP · eCPPT · PNPT', icon: 'Zap', category: ModuleCategory.METHODOLOGY },
+  { id: ModuleType.PLAYBOOK_BUFFER_OVERFLOW, name: 'Buffer Overflow & Exploit Dev', description: 'Fuzzing → EIP → shellcode, paso a paso · OSCP · OSED', icon: 'FlaskConical', category: ModuleCategory.METHODOLOGY },
+  { id: ModuleType.PLAYBOOK_REDTEAM_C2, name: 'Red Team Ops & C2/Evasion', description: 'Infra, Malleable C2, AV/EDR evasion, OPSEC · CRTO · OSEP', icon: 'Crosshair', category: ModuleCategory.METHODOLOGY },
+  { id: ModuleType.PLAYBOOK_MOBILE, name: 'Mobile Pentesting (MASVS)', description: 'Static + dynamic, mapeado a OWASP MASVS · eMAPT', icon: 'Smartphone', category: ModuleCategory.METHODOLOGY },
+  { id: ModuleType.PLAYBOOK_CLOUD, name: 'Cloud Security (AWS/Azure)', description: 'IAM, privesc y lateral en la nube · MITRE ATT&CK Cloud', icon: 'Cloud', category: ModuleCategory.METHODOLOGY },
+  { id: ModuleType.PLAYBOOK_WIRELESS, name: 'Wireless Pentesting', description: 'Handshake, PMKID, WPS Pixie-Dust · OSWP', icon: 'Radio', category: ModuleCategory.METHODOLOGY },
+  { id: ModuleType.PLAYBOOK_OSINT_RECON, name: 'OSINT & Recon Estructurado', description: 'Mapa de superficie de ataque antes de explotar · eJPT · CPTS · CEH', icon: 'Search', category: ModuleCategory.METHODOLOGY },
+  { id: ModuleType.PLAYBOOK_REPORT_WRITING, name: 'Redacción de Informes', description: 'Estructura y CVSS grado examen · OSCP · CREST · CPTS', icon: 'FileText', category: ModuleCategory.METHODOLOGY },
 
   // 🕵️ Inteligencia & OSINT
   { id: ModuleType.OSINT_SHERLOCK, name: 'Sherlock', description: 'Búsqueda de Usuarios', icon: 'Search', category: ModuleCategory.INTELLIGENCE },
@@ -191,7 +199,7 @@ const App: FC = () => {
   const toggleCategory = (cat: string) => setExpandedCategories(prev => ({...prev, [cat]: !prev[cat]}));
 
   const getIcon = (iconName: string) => {
-    const icons: any = { TerminalIcon, Globe, Eye, Wifi, Zap, Database, FileText, Shield, Lock, Server, Cpu, Bug, Smartphone, Cloud, Crosshair, Search, Key, Radio, List, Activity, Target, ShieldAlert, FolderSearch, Fingerprint, Users, Route, GraduationCap };
+    const icons: any = { TerminalIcon, Globe, Eye, Wifi, Zap, Database, FileText, Shield, Lock, Server, Cpu, Bug, Smartphone, Cloud, Crosshair, Search, Key, Radio, List, Activity, Target, ShieldAlert, FolderSearch, Fingerprint, Users, Route, GraduationCap, FlaskConical };
     const Icon = icons[iconName] || TerminalIcon;
     return <Icon size={18} />;
   };
