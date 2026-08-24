@@ -5,7 +5,7 @@
   <p><strong>Plataforma de Operaciones de Red Team Asistida por IA (C2 Intelligence Core)</strong></p>
 
   <p>
-    <a href="https://github.com/cwaly/AEGIS_RED_HORIZON/releases"><img src="https://img.shields.io/badge/version-1.1-blue.svg" alt="Version"></a>
+    <a href="https://github.com/cwaly/AEGIS_RED_HORIZON/releases"><img src="https://img.shields.io/badge/version-1.2-blue.svg" alt="Version"></a>
     <a href="https://docker.com"><img src="https://img.shields.io/badge/docker-ready-blue" alt="Docker"></a>
     <a href="https://img.shields.io/badge/AI-Gemini%202.5%20Flash-purple"><img src="https://img.shields.io/badge/AI-Gemini%202.5-purple" alt="AI"></a>
     <a href="https://ollama.com"><img src="https://img.shields.io/badge/Local%20AI-Ollama%20Ready-10b981" alt="Local AI"></a>
@@ -42,10 +42,14 @@ La plataforma separa inteligentemente la lógica de orquestación y análisis (A
 
 La plataforma se divide en componentes clave diseñados para maximizar la fluidez del auditor:
 
-* **Command Center (Dashboard):** El arsenal visual. Despliega más de 30 módulos categorizados por vector de ataque (Cloud, Web, Mobile, OSINT). Funciona como el punto de lanzamiento para cualquier operación.
-* **Terminal Multisesión:** Una interfaz táctica aislada por herramienta. Permite ejecutar un escaneo en Nmap en una pestaña, mientras en otra se prepara un payload en Metasploit, manteniendo el hilo conversacional de la IA independiente para cada objetivo.
-* **Panel OPSEC & System:** El centro de control de seguridad. Permite verificar el estado de conexión de las APIs externas, cambiar el *Callsign* (Alias) en tiempo real y ejecutar el **Panic Button**, un borrado de emergencia que destruye los datos locales y la memoria de la IA.
-* **Generador de Reportes:** Motor que compila instantáneamente los hallazgos de una terminal activa en un documento estructurado, clasificando las vulnerabilidades (CVSS) y detallando la remediación, listo para exportar a PDF o Word.
+* **Command Center (Dashboard):** El arsenal visual. Despliega **62 módulos** categorizados por vector de ataque (Metodología, OSINT, Cloud, Web, Mobile, C2, Acceso Inicial, Post-Explotación, Forense). Funciona como el punto de lanzamiento para cualquier operación.
+* **Workspaces por Engagement:** Cada target/cliente vive en su propio *engagement* aislado — sesiones de chat, hallazgos y contexto no se mezclan entre auditorías paralelas. Exportables/importables como JSON para backup o para moverlos a otra máquina.
+* **Terminal Multisesión + Vista Dividida:** Interfaz táctica aislada por herramienta, con historial persistente por engagement. La **Vista Dividida** permite trabajar 2-3 módulos en paralelo (ej. recon + privesc + Burp) en paneles independientes, cada uno con su propia IA sin bloquearse entre sí.
+* **Recursos & OSINT:** Panel de **83 enlaces curados** en 14 categorías — HackTricks, calculadoras CVSS, MITRE ATT&CK/OWASP, herramientas OSINT de personas/imágenes/infraestructura, write-ups de CTF, sandboxes de malware y más — cero dependencia de la IA, acceso directo.
+* **Tablero de Hallazgos:** Kanban (Encontrado → Verificando → Reportado) para trackear hallazgos manualmente durante la auditoría, independiente del historial de chat. Un hallazgo "Reportado" se promueve directo a un reporte exportable sin volver a consultar a la IA.
+* **Búsqueda Global (Ctrl+K):** Indexa el contenido de todas las sesiones de todos los engagements y módulos — encuentra en qué conversación mencionaste un CVE o una IP específica en segundos.
+* **Panel OPSEC & System:** El centro de control de seguridad. Verifica el estado de conexión de ambos motores de IA, cambia el *Callsign* (Alias), activa el **cifrado opcional del almacenamiento local** (AES-256-GCM vía passphrase) y ejecuta el **Panic Button**, un borrado de emergencia que destruye los datos locales y la memoria de la IA.
+* **Generador de Reportes:** Motor que compila los hallazgos de una terminal activa (o del Tablero de Hallazgos) en un documento estructurado, clasificando las vulnerabilidades (CVSS) y detallando la remediación — con evidencia fotográfica adjuntable por hallazgo, listo para exportar a PDF, Word o HTML.
 
 ---
 
@@ -56,37 +60,45 @@ La plataforma se divide en componentes clave diseñados para maximizar la fluide
 *Pantalla de acceso con política de Zero-Trust y OPSEC.*
 
 ### 2. Command Center (Arsenal)
-![Dashboard C2](./assets/2_Paneles.jpg)
-*Cuadrícula de módulos desplegados listos para la operación.*
+![Dashboard C2](./assets/2_Dashboard.jpg)
+*Cuadrícula de 62 módulos categorizados, con engagement activo, búsqueda global y navegación completa en el sidebar.*
 
-### 3. OPSEC & Integración de IA
-![Panel OPSEC](./assets/3_API_Google.jpg)
-*Panel de control de seguridad operativa, enlace directo para obtener la API y Panic Button.*
+### 3. OPSEC & Cifrado del Almacenamiento Local
+![Panel OPSEC y Cifrado](./assets/3_OPSEC_Cifrado.jpg)
+*Conectividad de ambos motores de IA, selector Cloud/Local, y el nuevo cifrado opt-in AES-256 para proteger sesiones y hallazgos.*
 
-### 4. Terminal Multisesión Asistida por IA
-![Reconocimiento Nmap](./assets/4_NMAP.jpg)
-*Generación de comandos para escaneos sigilosos y evasión de firewalls (Módulo Nmap).*
+### 4. Terminal Asistida por IA
+![Terminal con IA](./assets/4_Terminal_IA.jpg)
+*Generación de comandos y análisis de output en tiempo real, sin simulaciones (Módulo Nmap).*
 
-![Explotación Metasploit](./assets/5_Metasploit.jpg)
-*Guía de explotación paso a paso y configuración de listeners (Módulo Metasploit / EternalBlue).*
+### 5. Recursos & OSINT
+![Panel de Recursos y OSINT](./assets/5_Recursos_OSINT.jpg)
+*83 enlaces curados en 14 categorías: HackTricks, calculadoras CVSS, MITRE ATT&CK/OWASP, OSINT y más — sin depender de la IA.*
 
-![Web Fingerprinting](./assets/6_WHATWEB_CURL_WGET.jpg)
-*Perfilado de servidores web y extracción de código fuente (Módulo Web CLI).*
+### 6. Tablero de Hallazgos
+![Tablero Kanban de Hallazgos](./assets/6_Tablero_Hallazgos.jpg)
+*Kanban Encontrado → Verificando → Reportado, promovible directo a un reporte exportable.*
+
+### 7. Vista Dividida (Multi-Terminal)
+![Vista Dividida](./assets/7_Vista_Dividida.jpg)
+*Dos o tres módulos trabajando en paralelo, cada uno con su propia sesión de IA independiente.*
 
 ---
 
 ## ⚡ Capacidades del Arsenal
 
-- **🎓 Playbooks de Metodología (OSCP/eJPTv2):** Guías end-to-end paso a paso — AD Attack Path (recon → Kerberoasting → lateral → DCSync), Pivoting & Tunneling (Chisel, Ligolo-ng, SSH, proxychains, doble pivote) y Web & API Methodology (mapeado a OWASP Top 10 / API Top 10) — para afrontar certificaciones y CTFs con una metodología consistente, no solo comandos sueltos.
+- **🎓 11 Playbooks de Metodología (OSCP/eJPT/CRTO/OSED/eMAPT/OSWP/CEH/CREST):** Guías end-to-end paso a paso — AD Attack Path, Pivoting & Tunneling, Web & API Methodology, Privilege Escalation, Buffer Overflow & Exploit Dev, Red Team Ops & C2/Evasion, Mobile Pentesting, Cloud Security, Wireless Pentesting, OSINT & Recon Estructurado y Redacción de Informes — para afrontar certificaciones y CTFs con una metodología consistente, no solo comandos sueltos.
 - **🧠 IA Táctica Dual (Cloud + Local):** Motor conmutable desde el panel OPSEC — **☁️ Gemini 2.5** en la nube, o **🖥️ Ollama en local (sin censura)** para auditorías bajo NDA donde el tráfico no puede salir de tu máquina. Genera comandos precisos y analiza el *output* de la terminal sin alucinaciones.
-- **🔄 Persistencia Multisesión:** Abre múltiples herramientas en paralelo. El C2 mantiene el contexto de cada ataque en pestañas separadas, y el historial persiste aunque refresques el navegador.
+- **🗂️ Workspaces por Engagement:** Aísla sesiones, hallazgos y contexto por target/cliente. Exporta/importa un engagement completo como JSON para backup o para entregarlo a un cliente.
+- **🪟 Vista Dividida:** Trabaja 2-3 módulos en paralelo con sesiones de IA independientes (el input de un panel nunca se bloquea por lo que responde otro).
+- **🔍 Búsqueda Global (Ctrl+K):** Encuentra en segundos en qué engagement/módulo mencionaste un CVE, IP o cualquier texto entre todo tu historial.
+- **📌 Tablero de Hallazgos:** Kanban Encontrado → Verificando → Reportado, con descripción/remediación editable por hallazgo. Se promueve directo a reporte sin volver a consultar a la IA.
+- **🔗 Recursos & OSINT:** 83 enlaces curados en 14 categorías (metodología, CVSS, MITRE/OWASP, CVE/exploits, OSINT de personas/imágenes/infraestructura, CTF practice, write-ups, malware sandbox, cloud/mobile/wireless tools) — acceso directo, cero dependencia de la IA.
+- **🔐 Cifrado Opt-in del Almacenamiento Local:** AES-256-GCM con clave derivada por PBKDF2 de una passphrase — protege sesiones, engagements y hallazgos guardados en el navegador para engagements bajo NDA.
 - **🔒 API Gateway Backend:** Las credenciales (`GEMINI_API_KEY`, Ollama) viven exclusivamente en un backend Express — **nunca** se inyectan en el bundle del navegador.
 - **🚨 OPSEC & Panic Button:** Panel de conectividad en tiempo real (Cloud/Local) y botón de borrado de emergencia de memoria (Wipe Data).
-- **📚 CTI & Análisis:** Búsqueda en Exploit-DB (SearchSploit), Mapeo MITRE ATT&CK y calculadora de criticidad CVSS interactiva.
-- **☁️ Cloud & Web Hacking:** Módulos para AWS (Pacu), AzureHound, Burp Suite, SQLmap y CLI Fingerprinting.
-- **📱 Mobile Hacking:** Análisis de aplicaciones Android/iOS (MobSF, Frida).
-- **🔍 Forense & DFIR:** Módulos dedicados para Autopsy, Volatility 3 (memoria) y Wireshark (red).
-- **📂 Reportes Dinámicos:** Generación de informes profesionales multiformato estructurados por severidad.
+- **🎯 62 Módulos de Herramienta:** desde recon (Netdiscover, Nmap, Masscan, theHarvester, Subfinder/Amass) hasta post-explotación (Rubeus, Mimikatz, BloodHound/Impacket, CrackMapExec), C2 (Cobalt Strike, Sliver, Havoc, PowerShell Empire), forense (Autopsy, Volatility 3, Wireshark, Ghidra) y más — ver el detalle completo en el [Manual de Operaciones](./MANUAL.md).
+- **📂 Reportes Dinámicos:** Generación de informes multiformato (PDF/Word/HTML) estructurados por severidad, con evidencia fotográfica adjuntable por hallazgo (subida o pegado directo con Ctrl+V).
 
 ---
 
@@ -190,6 +202,16 @@ abre una página rota o de otro proyecto   instancia anterior que no cerró bien
 ----------------------------------------------------------------------------------------------------------------------------------
 Botón del Pánico activado                 Si usaste el Panic Button, la caché se ha purgado. 
                                           Solo vuelve a ingresar tu alias para reconectar con el C2.
+----------------------------------------------------------------------------------------------------------------------------------
+Olvidé mi passphrase de cifrado           No hay recuperación posible (es cifrado real) — en la pantalla de desbloqueo,
+                                          usa "¿Olvidaste tu passphrase? Borrar datos cifrados". Borra solo las sesiones/
+                                          engagements/hallazgos cifrados y te devuelve el acceso a la app; el resto de tu
+                                          config (alias, idioma, motor de IA) no se toca.
+----------------------------------------------------------------------------------------------------------------------------------
+El contenedor Docker no arrancó solo      Docker Desktop en Windows no siempre respeta `--restart unless-stopped` tras un
+tras reiniciar la máquina                 reinicio completo del SO (a diferencia de solo reiniciar Docker Desktop). Corre
+                                          "docker start aegis-red-horizon" manualmente, o activa "Start Docker Desktop
+                                          when you sign in" en Settings → General.
 
 📘 Documentación Oficial
 Para comprender la doctrina de uso, la filosofía de la arquitectura y el flujo del "Loop de Combate", consulta el 
