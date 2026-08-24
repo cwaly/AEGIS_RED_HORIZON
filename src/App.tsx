@@ -9,6 +9,7 @@ import { BootSequence } from './components/BootSequence';
 import { LinksPanel } from './components/LinksPanel';
 import { FindingsBoard } from './components/FindingsBoard';
 import { SplitTerminalView } from './components/SplitTerminalView';
+import { GlobalSearchModal } from './components/GlobalSearchModal';
 import { sessionKey } from './utils/sessionKey';
 import { isEncryptionEnabled, setupEncryption, unlockEncryption, disableEncryption, wipeEncryptedData, encryptString, decryptString } from './services/vault';
 import {
@@ -42,6 +43,7 @@ const TOOLS_CONFIG: Tool[] = [
   { id: ModuleType.DOXING_LEAKS, name: 'Doxing & Leaks', description: 'Correos y Fugas', icon: 'Database', category: ModuleCategory.INTELLIGENCE },
 
   // 🎯 Recon & Bug Bounty
+  { id: ModuleType.RECON_NETDISCOVER, name: 'Netdiscover / ARP-Scan', description: 'Descubrimiento de hosts vivos antes de escanear puertos', icon: 'Wifi', category: ModuleCategory.BUG_BOUNTY },
   { id: ModuleType.RECON_NMAP, name: 'Nmap', description: 'Port & Service Scan', icon: 'TerminalIcon', category: ModuleCategory.BUG_BOUNTY },
   { id: ModuleType.RECON_MASSCAN, name: 'Masscan', description: 'Escaneo asíncrono', icon: 'Zap', category: ModuleCategory.BUG_BOUNTY },
   { id: ModuleType.BUG_BOUNTY_RECON, name: 'Subfinder/Amass', description: 'Reconocimiento Masivo', icon: 'Globe', category: ModuleCategory.BUG_BOUNTY },
@@ -218,6 +220,18 @@ const App: FC = () => {
   const [sessionsData, setSessionsData] = useState<Record<string, Message[]>>(initState.sessions);
   const [findings, setFindings] = useState<BoardFinding[]>(() => (isEncryptionEnabled() ? [] : loadFindingsFromStorage()));
   const [engagementMenuOpen, setEngagementMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setSearchOpen(true);
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, []);
   const [newEngagementName, setNewEngagementName] = useState('');
 
   const [vaultKey, setVaultKey] = useState<CryptoKey | null>(null);
@@ -533,6 +547,14 @@ const App: FC = () => {
     }
   };
 
+  const handleOpenSearchResult = (engagementId: string, module: ModuleType) => {
+    setActiveEngagementId(engagementId);
+    setActiveModule(module);
+    setSplitView(false);
+    setCurrentView('module');
+    setSearchOpen(false);
+  };
+
   const handleExportEngagement = (id: string) => {
     const eng = engagements.find(e => e.id === id);
     if (!eng) return;
@@ -698,6 +720,15 @@ const App: FC = () => {
     <div className="flex h-screen w-full bg-background text-gray-200 overflow-hidden font-sans">
       <TacticalOverlay />
       {isReportModalOpen && reportData && (<ReportModal report={reportData} onClose={() => setIsReportModalOpen(false)} />)}
+      {searchOpen && (
+        <GlobalSearchModal
+          sessionsData={sessionsData}
+          engagements={engagements}
+          toolsConfig={TOOLS_CONFIG}
+          onOpenResult={handleOpenSearchResult}
+          onClose={() => setSearchOpen(false)}
+        />
+      )}
       {settingsOpen && (
         <div className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-surface border border-gray-700 rounded-lg w-full max-w-md shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar">
@@ -939,6 +970,10 @@ const App: FC = () => {
           <button onClick={() => setCurrentView('dashboard')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${currentView === 'dashboard' ? 'bg-rose-500/20 text-white border border-rose-500/50' : 'text-gray-400 hover:bg-white/5'}`}><Home size={18} /><span className="font-bold text-sm">DASHBOARD</span></button>
           <button onClick={() => setCurrentView('links')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${currentView === 'links' ? 'bg-rose-500/20 text-white border border-rose-500/50' : 'text-gray-400 hover:bg-white/5'}`}><Link2 size={18} /><span className="font-bold text-sm">RECURSOS & OSINT</span></button>
           <button onClick={() => setCurrentView('findings')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${currentView === 'findings' ? 'bg-rose-500/20 text-white border border-rose-500/50' : 'text-gray-400 hover:bg-white/5'}`}><Kanban size={18} /><span className="font-bold text-sm">HALLAZGOS</span></button>
+          <button onClick={() => setSearchOpen(true)} className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg transition-colors text-gray-400 hover:bg-white/5">
+            <span className="flex items-center gap-3"><Search size={18} /><span className="font-bold text-sm">BUSCAR</span></span>
+            <span className="text-[9px] font-mono text-gray-600 border border-gray-700 rounded px-1.5 py-0.5">CTRL+K</span>
+          </button>
         </div>
         <nav className="flex-1 overflow-y-auto py-2 px-0 space-y-0 custom-scrollbar">
           {Object.values(ModuleCategory).map((category) => (
