@@ -6,11 +6,12 @@ import { Logo } from './components/Logo';
 import { ReportModal } from './components/ReportModal';
 import { TacticalOverlay } from './components/TacticalOverlay';
 import { BootSequence } from './components/BootSequence';
+import { LinksPanel } from './components/LinksPanel';
 import {
   Terminal as TerminalIcon, Settings, FileText, Menu, X, ChevronDown,
   ChevronRight, Shield, Wifi, Globe, Database, Lock, Server, Eye, Zap,
   Cpu, Bug, Smartphone, Cloud, Crosshair, Search, Key,
-  Radio, List, Activity, Target, ShieldAlert, FolderSearch, Fingerprint, Users, Home, LogOut, AlertTriangle, HardDrive, Route, GraduationCap, FlaskConical
+  Radio, List, Activity, Target, ShieldAlert, FolderSearch, Fingerprint, Users, Home, LogOut, AlertTriangle, HardDrive, Route, GraduationCap, FlaskConical, Link2
 } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -166,7 +167,7 @@ const App: FC = () => {
   }, []);
 
   const [loginName, setLoginName] = useState('');
-  const [currentView, setCurrentView] = useState<'dashboard' | 'module'>('dashboard');
+  const [currentView, setCurrentView] = useState<'dashboard' | 'module' | 'links'>('dashboard');
   const [activeModule, setActiveModule] = useState<ModuleType>(ModuleType.RECON_NMAP);
 
   const [sessionsData, setSessionsData] = useState<Record<string, Message[]>>(loadSessionsFromStorage);
@@ -457,7 +458,10 @@ const App: FC = () => {
           </span>
           <span>{clock}</span>
         </div>
-        <div className="px-4 py-2 mt-2"><button onClick={() => setCurrentView('dashboard')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${currentView === 'dashboard' ? 'bg-rose-500/20 text-white border border-rose-500/50' : 'text-gray-400 hover:bg-white/5'}`}><Home size={18} /><span className="font-bold text-sm">DASHBOARD</span></button></div>
+        <div className="px-4 py-2 mt-2 space-y-1">
+          <button onClick={() => setCurrentView('dashboard')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${currentView === 'dashboard' ? 'bg-rose-500/20 text-white border border-rose-500/50' : 'text-gray-400 hover:bg-white/5'}`}><Home size={18} /><span className="font-bold text-sm">DASHBOARD</span></button>
+          <button onClick={() => setCurrentView('links')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${currentView === 'links' ? 'bg-rose-500/20 text-white border border-rose-500/50' : 'text-gray-400 hover:bg-white/5'}`}><Link2 size={18} /><span className="font-bold text-sm">RECURSOS & OSINT</span></button>
+        </div>
         <nav className="flex-1 overflow-y-auto py-2 px-0 space-y-0 custom-scrollbar">
           {Object.values(ModuleCategory).map((category) => (
             <div key={category} className="border-b border-gray-800/50">
@@ -510,6 +514,7 @@ const App: FC = () => {
                 </div>
             </div>
         )}
+        {currentView === 'links' && (<LinksPanel />)}
         {currentView === 'module' && (<Terminal messages={currentMessages} onSendMessage={handleUserMessage} onGenerateReport={handleGenerateReport} onClearSession={handleClearSession} isLoading={isLoading} activeModule={activeModule} activeModuleName={activeToolName} activeProvider={aiProvider} />)}
       </main>
     </div>

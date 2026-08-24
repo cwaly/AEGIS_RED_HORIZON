@@ -125,6 +125,12 @@ export interface UserProfile {
 
 export type Language = 'es' | 'en';
 
+export interface EvidenceImage {
+  id: string;
+  dataUrl: string;
+  caption: string;
+}
+
 export interface AuditFinding {
   severity: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW' | 'INFO';
   title: string;
