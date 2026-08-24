@@ -8,6 +8,7 @@ export enum LinkCategory {
   OSINT_INFRA = 'OSINT · DOMINIOS, DNS & INFRAESTRUCTURA',
   HASH_CRYPTO = 'HASH IDENTIFICATION & CRYPTO',
   CTF_PRACTICE = 'CTF · PLATAFORMAS DE PRÁCTICA',
+  WRITEUPS = 'CTF · WRITE-UPS & WALKTHROUGHS',
   MALWARE_SANDBOX = 'MALWARE & SANDBOX ANALYSIS',
   CLOUD_TOOLS = 'CLOUD SECURITY · HERRAMIENTAS',
   MOBILE_TOOLS = 'MOBILE SECURITY · HERRAMIENTAS',
@@ -103,6 +104,13 @@ export const RESOURCE_LINKS: ResourceLink[] = [
   { name: 'PicoCTF', url: 'https://picoctf.org/', description: 'Plataforma de CTF orientada a principiantes, por Carnegie Mellon.', category: LinkCategory.CTF_PRACTICE },
   { name: 'OverTheWire', url: 'https://overthewire.org/wargames/', description: 'Wargames clásicos de Linux/seguridad por niveles progresivos.', category: LinkCategory.CTF_PRACTICE },
   { name: 'CTFtime', url: 'https://ctftime.org/', description: 'Calendario y ranking de competencias CTF activas en el mundo.', category: LinkCategory.CTF_PRACTICE },
+
+  // CTF write-ups / walkthroughs (máquinas retiradas / gratuitas)
+  { name: 'IppSec.rocks', url: 'https://ippsec.rocks/', description: 'Buscador de los walkthroughs en video de IppSec por máquina, técnica o CVE.', category: LinkCategory.WRITEUPS },
+  { name: '0xdf Hacks Stuff', url: 'https://0xdf.gitlab.io/', description: 'Blog con write-ups muy detallados de máquinas retiradas de HTB.', category: LinkCategory.WRITEUPS },
+  { name: 'HTB Academy', url: 'https://academy.hackthebox.com/', description: 'Rutas de aprendizaje oficiales y guiadas de Hack The Box, paso a paso.', category: LinkCategory.WRITEUPS },
+  { name: 'InfoSec Write-ups', url: 'https://infosecwriteups.com/', description: 'Publicación comunitaria con miles de write-ups de HTB, THM y bug bounty.', category: LinkCategory.WRITEUPS },
+  { name: 'CTFtime Write-ups', url: 'https://ctftime.org/writeups', description: 'Índice de write-ups de retos de CTFs pasados, filtrable por categoría.', category: LinkCategory.WRITEUPS },
 
   // Malware / sandbox
   { name: 'Any.run', url: 'https://any.run/', description: 'Sandbox interactivo en la nube para analizar malware en vivo.', category: LinkCategory.MALWARE_SANDBOX },

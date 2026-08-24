@@ -12,6 +12,7 @@ const CATEGORY_ACCENT: Record<LinkCategory, string> = {
   [LinkCategory.OSINT_INFRA]: '#38bdf8',
   [LinkCategory.HASH_CRYPTO]: '#10b981',
   [LinkCategory.CTF_PRACTICE]: '#fb923c',
+  [LinkCategory.WRITEUPS]: '#2dd4bf',
   [LinkCategory.MALWARE_SANDBOX]: '#ef4444',
   [LinkCategory.CLOUD_TOOLS]: '#0ea5e9',
   [LinkCategory.MOBILE_TOOLS]: '#f472b6',
