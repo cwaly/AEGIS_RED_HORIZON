@@ -124,9 +124,11 @@ La forma más limpia y profesional.
    docker build -t aegis-red-horizon .
 
 2. Ejecutar contenedor:
-    docker run -d -p 1337:1337 --env-file .env -e OLLAMA_BASE_URL=http://host.docker.internal:11434 aegis-red-horizon
+    docker run -d --name aegis-red-horizon --restart unless-stopped -p 1337:1337 --env-file .env -e OLLAMA_BASE_URL=http://host.docker.internal:11434 aegis-red-horizon
 
     ⚠️ Si usas el motor LOCAL (Ollama corriendo en tu máquina, fuera del contenedor), necesitas el `-e OLLAMA_BASE_URL=...` de arriba: dentro del contenedor `127.0.0.1` apunta al propio contenedor, no a tu host. En Linux nativo (no Docker Desktop) puede que además necesites `--add-host=host.docker.internal:host-gateway`. Si solo usarás el motor CLOUD (Gemini), puedes omitir esa variable.
+
+    ⚠️ `--restart unless-stopped` hace que el contenedor se reinicie solo si Docker Desktop/WSL2 lo mata en segundo plano (código de salida 137, común tras suspender la máquina o reiniciar Docker Desktop) — evita tener que levantarlo a mano cada vez.
 
 3. Acceso: Entra en tu navegador a http://localhost:1337
 
