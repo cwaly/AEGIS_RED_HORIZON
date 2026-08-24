@@ -36,6 +36,7 @@ const TOOLS_CONFIG: Tool[] = [
   { id: ModuleType.PLAYBOOK_REPORT_WRITING, name: 'Redacción de Informes', description: 'Estructura y CVSS grado examen · OSCP · CREST · CPTS', icon: 'FileText', category: ModuleCategory.METHODOLOGY },
 
   // 🕵️ Inteligencia & OSINT
+  { id: ModuleType.OSINT_THEHARVESTER, name: 'theHarvester', description: 'Correos, subdominios y empleados desde fuentes públicas', icon: 'Database', category: ModuleCategory.INTELLIGENCE },
   { id: ModuleType.OSINT_SHERLOCK, name: 'Sherlock', description: 'Búsqueda de Usuarios', icon: 'Search', category: ModuleCategory.INTELLIGENCE },
   { id: ModuleType.OSINT_MALTEGO, name: 'Maltego', description: 'Análisis de Enlaces', icon: 'Eye', category: ModuleCategory.INTELLIGENCE },
   { id: ModuleType.OSINT_RECON_NG, name: 'Recon-ng', description: 'OSINT Framework', icon: 'Target', category: ModuleCategory.INTELLIGENCE },
@@ -63,6 +64,7 @@ const TOOLS_CONFIG: Tool[] = [
   { id: ModuleType.COBALT_STRIKE, name: 'Cobalt Strike', description: 'Advanced C2', icon: 'Crosshair', category: ModuleCategory.WEAPONIZATION },
   { id: ModuleType.SLIVER_C2, name: 'Sliver C2', description: 'Implant Framework', icon: 'Crosshair', category: ModuleCategory.WEAPONIZATION },
   { id: ModuleType.HAVOC_C2, name: 'Havoc C2', description: 'Modern C2 Framework', icon: 'Crosshair', category: ModuleCategory.WEAPONIZATION },
+  { id: ModuleType.POWERSHELL_EMPIRE, name: 'PowerShell Empire', description: 'C2 open source de PowerShell tradecraft', icon: 'Crosshair', category: ModuleCategory.WEAPONIZATION },
   { id: ModuleType.PAYLOAD_GEN, name: 'MSFVenom / Villain', description: 'Generación de Payloads', icon: 'Zap', category: ModuleCategory.WEAPONIZATION },
   { id: ModuleType.SOCIAL_ENGINEERING, name: 'SET Toolkit', description: 'Ingeniería Social', icon: 'Users', category: ModuleCategory.WEAPONIZATION },
   { id: ModuleType.PHISHING_PREP, name: 'GoPhish', description: 'Campañas Phishing', icon: 'Target', category: ModuleCategory.WEAPONIZATION },
@@ -79,6 +81,7 @@ const TOOLS_CONFIG: Tool[] = [
 
   // 🔓 Initial Access
   { id: ModuleType.METASPLOIT, name: 'Metasploit Framework', description: 'Exploitation Core', icon: 'TerminalIcon', category: ModuleCategory.INITIAL_ACCESS },
+  { id: ModuleType.EVIL_WINRM, name: 'Evil-WinRM', description: 'Shell WinRM con credenciales o pass-the-hash', icon: 'TerminalIcon', category: ModuleCategory.INITIAL_ACCESS },
   { id: ModuleType.RESPONDER, name: 'Responder', description: 'LLMNR/NBT-NS Poisoning', icon: 'Wifi', category: ModuleCategory.INITIAL_ACCESS },
   { id: ModuleType.HYDRA_HASHCAT, name: 'Hydra / Hashcat / John', description: 'Brute Force & Rainbow Tables', icon: 'Lock', category: ModuleCategory.INITIAL_ACCESS },
   { id: ModuleType.WIFITE, name: 'Wifite 2', description: 'Auto-Wifi Audit', icon: 'Radio', category: ModuleCategory.INITIAL_ACCESS },
@@ -89,6 +92,7 @@ const TOOLS_CONFIG: Tool[] = [
   // 🚩 Post Exploitation
   { id: ModuleType.PRIV_ESC, name: 'LinPEAS / WinPEAS', description: 'Escalada de Privilegios', icon: 'Zap', category: ModuleCategory.POST_EXPLOITATION },
   { id: ModuleType.ACTIVE_DIRECTORY, name: 'Bloodhound / Impacket', description: 'Active Directory', icon: 'Server', category: ModuleCategory.POST_EXPLOITATION },
+  { id: ModuleType.RUBEUS, name: 'Rubeus', description: 'Abuso de Kerberos: roasting, PtT, Golden/Silver Ticket', icon: 'Key', category: ModuleCategory.POST_EXPLOITATION },
   { id: ModuleType.CRACKMAPEXEC, name: 'CrackMapExec', description: 'NetExec / SMB Spray', icon: 'Server', category: ModuleCategory.POST_EXPLOITATION },
   { id: ModuleType.MIMIKATZ, name: 'Mimikatz', description: 'Credential Dumping', icon: 'Key', category: ModuleCategory.POST_EXPLOITATION },
   { id: ModuleType.PERSISTENCE, name: 'Persistencia', description: 'Backdoors / Tareas', icon: 'Shield', category: ModuleCategory.POST_EXPLOITATION },
@@ -97,6 +101,7 @@ const TOOLS_CONFIG: Tool[] = [
   { id: ModuleType.FORENSICS_AUTOPSY, name: 'Autopsy', description: 'Análisis de Artefactos', icon: 'Fingerprint', category: ModuleCategory.FORENSICS },
   { id: ModuleType.FORENSICS_VOLATILITY, name: 'Volatility 3', description: 'Análisis en Memoria', icon: 'Cpu', category: ModuleCategory.FORENSICS },
   { id: ModuleType.FORENSICS_WIRESHARK, name: 'Wireshark', description: 'Análisis de PCAP', icon: 'Activity', category: ModuleCategory.FORENSICS },
+  { id: ModuleType.FORENSICS_GHIDRA, name: 'Ghidra', description: 'Ingeniería inversa de binarios y análisis de malware', icon: 'Cpu', category: ModuleCategory.FORENSICS },
 
   // 📊 Reporting
   { id: ModuleType.REPORT_GENERATOR, name: 'Report Builder', description: 'Generar Informe Final', icon: 'FileText', category: ModuleCategory.REPORTING },
