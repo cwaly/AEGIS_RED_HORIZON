@@ -749,7 +749,7 @@ const App: FC = () => {
                 <div className="bg-[#0a0a0c] border border-gray-800 p-4 rounded-lg shadow-inner">
                     <h3 className="text-[10px] text-gray-500 font-bold tracking-widest mb-3 uppercase">Conectividad del C2</h3>
                     <div className="flex items-center justify-between text-sm mb-2">
-                        <span className="text-gray-300 font-medium">☁️ Gemini 2.5 (Cloud)</span>
+                        <span className="text-gray-300 font-medium">☁️ Gemini 3.7 (Cloud)</span>
                         {health === null ? (
                           <span className="text-gray-500 font-mono text-xs">CHECKING...</span>
                         ) : health.gemini ? (
@@ -797,7 +797,7 @@ const App: FC = () => {
                             className={`flex flex-col items-center gap-1 py-3 rounded-lg border text-xs font-bold transition-colors ${aiProvider === 'gemini' ? 'bg-rose-500/20 border-rose-500 text-rose-400' : 'border-gray-700 text-gray-500 hover:border-gray-600'}`}
                         >
                             <Cloud size={18} /> CLOUD
-                            <span className="text-[9px] font-normal opacity-70">Gemini 2.5</span>
+                            <span className="text-[9px] font-normal opacity-70">Gemini 3.7</span>
                         </button>
                         <button
                             onClick={() => setAiProvider('ollama')}

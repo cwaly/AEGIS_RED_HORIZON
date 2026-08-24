@@ -16,7 +16,7 @@ AEGIS: Vanguard Core: Plataforma de monitorización y defensa activa que actúa 
 
 AEGIS: Red Horizon: El Cerebro Ofensivo C2 (Command & Control) asistido por IA para operaciones de Red Teaming y Ciberinteligencia.
 
-Red Horizon no fue creada para reemplazar al operador humano, sino para actuar como un Multiplicador de Fuerza. Es el núcleo de inteligencia dual (Google Gemini 2.5 en la nube, u Ollama en local sin censura) que orquesta las manos del auditor, garantizando la agilidad en las 5 fases metodológicas del Pentesting:
+Red Horizon no fue creada para reemplazar al operador humano, sino para actuar como un Multiplicador de Fuerza. Es el núcleo de inteligencia dual (Google Gemini 3.7 en la nube, u Ollama en local sin censura) que orquesta las manos del auditor, garantizando la agilidad en las 5 fases metodológicas del Pentesting:
 
 Reconocimiento: OSINT y mapeo de superficie.
 
@@ -52,7 +52,7 @@ Despliega la plataforma (start_aegis.bat en Windows, o start_aegis.sh en Linux/m
 🧠 Fase 1.5: Doctrina Cloud vs Local
 AEGIS opera con dos núcleos de IA intercambiables en caliente desde el panel OPSEC:
 
-- ☁️ CLOUD (Gemini 2.5): máxima capacidad y velocidad. Úsalo en CTFs y entornos sin restricción contractual de datos.
+- ☁️ CLOUD (Gemini 3.7): máxima capacidad y velocidad. Úsalo en CTFs y entornos sin restricción contractual de datos.
 - 🖥️ LOCAL (Ollama, sin censura): todo el razonamiento ocurre en tu propia GPU, sin salir de tu red. Es el modo doctrinal correcto para auditorías reales bajo NDA, donde el target, los hallazgos y las credenciales del cliente NO pueden abandonar tu máquina. El modelo activo se configura vía OLLAMA_MODEL en .env — no requiere tocar código.
 
 ⚙️ Fase 2: El Panel de Control y el Botón del Pánico

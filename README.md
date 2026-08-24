@@ -7,7 +7,7 @@
   <p>
     <a href="https://github.com/cwaly/AEGIS_RED_HORIZON/releases"><img src="https://img.shields.io/badge/version-1.2-blue.svg" alt="Version"></a>
     <a href="https://docker.com"><img src="https://img.shields.io/badge/docker-ready-blue" alt="Docker"></a>
-    <a href="https://img.shields.io/badge/AI-Gemini%202.5%20Flash-purple"><img src="https://img.shields.io/badge/AI-Gemini%202.5-purple" alt="AI"></a>
+    <a href="https://img.shields.io/badge/AI-Gemini%203.7%20Flash-purple"><img src="https://img.shields.io/badge/AI-Gemini%203.7-purple" alt="AI"></a>
     <a href="https://ollama.com"><img src="https://img.shields.io/badge/Local%20AI-Ollama%20Ready-10b981" alt="Local AI"></a>
   </p>
   
@@ -88,7 +88,7 @@ La plataforma se divide en componentes clave diseñados para maximizar la fluide
 ## ⚡ Capacidades del Arsenal
 
 - **🎓 11 Playbooks de Metodología (OSCP/eJPT/CRTO/OSED/eMAPT/OSWP/CEH/CREST):** Guías end-to-end paso a paso — AD Attack Path, Pivoting & Tunneling, Web & API Methodology, Privilege Escalation, Buffer Overflow & Exploit Dev, Red Team Ops & C2/Evasion, Mobile Pentesting, Cloud Security, Wireless Pentesting, OSINT & Recon Estructurado y Redacción de Informes — para afrontar certificaciones y CTFs con una metodología consistente, no solo comandos sueltos.
-- **🧠 IA Táctica Dual (Cloud + Local):** Motor conmutable desde el panel OPSEC — **☁️ Gemini 2.5** en la nube, o **🖥️ Ollama en local (sin censura)** para auditorías bajo NDA donde el tráfico no puede salir de tu máquina. Genera comandos precisos y analiza el *output* de la terminal sin alucinaciones.
+- **🧠 IA Táctica Dual (Cloud + Local):** Motor conmutable desde el panel OPSEC — **☁️ Gemini 3.7** en la nube, o **🖥️ Ollama en local (sin censura)** para auditorías bajo NDA donde el tráfico no puede salir de tu máquina. Genera comandos precisos y analiza el *output* de la terminal sin alucinaciones.
 - **🗂️ Workspaces por Engagement:** Aísla sesiones, hallazgos y contexto por target/cliente. Exporta/importa un engagement completo como JSON para backup o para entregarlo a un cliente.
 - **🪟 Vista Dividida:** Trabaja 2-3 módulos en paralelo con sesiones de IA independientes (el input de un panel nunca se bloquea por lo que responde otro).
 - **🔍 Búsqueda Global (Ctrl+K):** Encuentra en segundos en qué engagement/módulo mencionaste un CVE, IP o cualquier texto entre todo tu historial.
@@ -108,12 +108,12 @@ La plataforma se divide en componentes clave diseñados para maximizar la fluide
 
 AEGIS Red Horizon corre sobre un **AI Gateway** propio (backend Express) que puede hablar con dos motores, conmutables en caliente desde el panel OPSEC & SYSTEM:
 
-- **☁️ CLOUD — Gemini 2.5 Flash:** rápido, sin requisitos de hardware, ideal para CTFs. Requiere API Key de Google.
+- **☁️ CLOUD — Gemini 3.7 Flash:** rápido, sin requisitos de hardware, ideal para CTFs. Requiere API Key de Google.
 - **🖥️ LOCAL — Ollama (sin censura):** todo el tráfico de la auditoría se queda en tu máquina. Recomendado para engagements reales bajo NDA donde no puedes enviar datos del cliente a la nube. Requiere [Ollama](https://ollama.com) instalado y un modelo descargado.
 
 **Ninguna API Key viaja jamás al navegador** — vive únicamente en el backend (`server/`), leída de `.env`.
 
-### 🔑 Paso 0a: Motor Cloud — Gemini 2.5 (opcional si solo usarás LOCAL)
+### 🔑 Paso 0a: Motor Cloud — Gemini 3.7 (opcional si solo usarás LOCAL)
 1. Entra a [Google AI Studio](https://aistudio.google.com/app/apikey) con tu cuenta de Google.
 2. Haz clic en el botón azul **"Create API key"**.
 3. Copia la clave generada. La usarás en el archivo `.env` en los pasos siguientes (variable `GEMINI_API_KEY`).
