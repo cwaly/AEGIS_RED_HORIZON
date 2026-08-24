@@ -7,6 +7,7 @@ import { ReportModal } from './components/ReportModal';
 import { TacticalOverlay } from './components/TacticalOverlay';
 import { BootSequence } from './components/BootSequence';
 import { LinksPanel } from './components/LinksPanel';
+import { isEncryptionEnabled, setupEncryption, unlockEncryption, disableEncryption, wipeEncryptedData, encryptString, decryptString } from './services/vault';
 import {
   Terminal as TerminalIcon, Settings, FileText, Menu, X, ChevronDown,
   ChevronRight, Shield, Wifi, Globe, Database, Lock, Server, Eye, Zap,
@@ -195,24 +196,119 @@ const App: FC = () => {
   const [currentView, setCurrentView] = useState<'dashboard' | 'module' | 'links'>('dashboard');
   const [activeModule, setActiveModule] = useState<ModuleType>(ModuleType.RECON_NMAP);
 
-  const [initState] = useState(loadEngagementsAndSessions);
+  // Si el cifrado está activo, las sesiones/engagements viven cifrados en localStorage y
+  // no se pueden leer de forma síncrona al montar (hace falta la passphrase primero) —
+  // arrancan vacíos y se pueblan tras desbloquear el vault. Si no está activo, se cargan
+  // igual que siempre.
+  const [initState] = useState(() => (isEncryptionEnabled() ? { engagements: [], activeEngagementId: '', sessions: {} } : loadEngagementsAndSessions()));
   const [engagements, setEngagements] = useState<Engagement[]>(initState.engagements);
   const [activeEngagementId, setActiveEngagementId] = useState<string>(initState.activeEngagementId);
   const [sessionsData, setSessionsData] = useState<Record<string, Message[]>>(initState.sessions);
   const [engagementMenuOpen, setEngagementMenuOpen] = useState(false);
   const [newEngagementName, setNewEngagementName] = useState('');
 
-  useEffect(() => {
-    localStorage.setItem('aegis_sessions', JSON.stringify(sessionsData));
-  }, [sessionsData]);
+  const [vaultKey, setVaultKey] = useState<CryptoKey | null>(null);
+  const [vaultUnlocked, setVaultUnlocked] = useState(() => !isEncryptionEnabled());
+  const [vaultPassphrase, setVaultPassphrase] = useState('');
+  const [vaultError, setVaultError] = useState('');
+  const [vaultBusy, setVaultBusy] = useState(false);
+  const [newPassphrase, setNewPassphrase] = useState('');
+  const [confirmPassphrase, setConfirmPassphrase] = useState('');
+  const [encryptionSetupError, setEncryptionSetupError] = useState('');
+  const [encryptionEnabledFlag, setEncryptionEnabledFlag] = useState(isEncryptionEnabled);
+
+  const persistSessionsData = async (data: Record<string, Message[]>, key: CryptoKey | null) => {
+    const json = JSON.stringify(data);
+    localStorage.setItem('aegis_sessions', key ? await encryptString(key, json) : json);
+  };
+  const persistEngagements = async (data: Engagement[], key: CryptoKey | null) => {
+    const json = JSON.stringify(data);
+    localStorage.setItem('aegis_engagements', key ? await encryptString(key, json) : json);
+  };
 
   useEffect(() => {
-    localStorage.setItem('aegis_engagements', JSON.stringify(engagements));
-  }, [engagements]);
+    if (!vaultUnlocked) return;
+    void persistSessionsData(sessionsData, vaultKey);
+  }, [sessionsData, vaultUnlocked, vaultKey]);
 
   useEffect(() => {
+    if (!vaultUnlocked) return;
+    void persistEngagements(engagements, vaultKey);
+  }, [engagements, vaultUnlocked, vaultKey]);
+
+  useEffect(() => {
+    if (!vaultUnlocked || !activeEngagementId) return;
     localStorage.setItem('aegis_active_engagement', activeEngagementId);
-  }, [activeEngagementId]);
+  }, [activeEngagementId, vaultUnlocked]);
+
+  const handleUnlockVault = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!vaultPassphrase) return;
+    setVaultBusy(true);
+    setVaultError('');
+    try {
+      const key = await unlockEncryption(vaultPassphrase);
+      if (!key) {
+        setVaultError('Passphrase incorrecta.');
+        return;
+      }
+      const rawSessions = localStorage.getItem('aegis_sessions');
+      const rawEngagements = localStorage.getItem('aegis_engagements');
+      let sessions: Record<string, Message[]> = {};
+      let engs: Engagement[] = [];
+      if (rawSessions) {
+        sessions = JSON.parse(await decryptString(key, rawSessions));
+        Object.values(sessions).forEach((msgs) => msgs.forEach((m) => { m.timestamp = new Date(m.timestamp); }));
+      }
+      if (rawEngagements) {
+        engs = JSON.parse(await decryptString(key, rawEngagements));
+      }
+      if (engs.length === 0) {
+        engs = [{ id: uuidv4(), name: 'Engagement por defecto', createdAt: new Date().toISOString() }];
+      }
+      const savedActiveId = localStorage.getItem('aegis_active_engagement');
+      const activeId = (savedActiveId && engs.some(x => x.id === savedActiveId)) ? savedActiveId : engs[0].id;
+
+      setSessionsData(sessions);
+      setEngagements(engs);
+      setActiveEngagementId(activeId);
+      setVaultKey(key);
+      setVaultUnlocked(true);
+      setVaultPassphrase('');
+    } catch {
+      setVaultError('No se pudo desbloquear. Verifica la passphrase.');
+    } finally {
+      setVaultBusy(false);
+    }
+  };
+
+  const handleWipeVault = () => {
+    if (!window.confirm('Esto borra PERMANENTEMENTE las sesiones y engagements cifrados de este navegador (no se puede deshacer). ¿Continuar?')) return;
+    wipeEncryptedData();
+    window.location.reload();
+  };
+
+  const handleEnableEncryption = async () => {
+    if (newPassphrase.length < 8) { setEncryptionSetupError('Usa al menos 8 caracteres.'); return; }
+    if (newPassphrase !== confirmPassphrase) { setEncryptionSetupError('Las passphrases no coinciden.'); return; }
+    setEncryptionSetupError('');
+    const key = await setupEncryption(newPassphrase);
+    await persistSessionsData(sessionsData, key);
+    await persistEngagements(engagements, key);
+    setVaultKey(key);
+    setEncryptionEnabledFlag(true);
+    setNewPassphrase('');
+    setConfirmPassphrase('');
+  };
+
+  const handleDisableEncryption = async () => {
+    if (!window.confirm('Esto descifra tus datos y los deja en texto plano en este navegador. ¿Continuar?')) return;
+    await persistSessionsData(sessionsData, null);
+    await persistEngagements(engagements, null);
+    disableEncryption();
+    setVaultKey(null);
+    setEncryptionEnabledFlag(false);
+  };
 
   const [isLoading, setIsLoading] = useState(false);
   const [reportData, setReportData] = useState<AuditReport | null>(null);
@@ -375,6 +471,38 @@ const App: FC = () => {
 
   const currentMessages = sessionsData[sessionKey(activeEngagementId, activeModule)] || [];
 
+  if (!vaultUnlocked) {
+    return (
+      <div className="h-screen w-full bg-[#0a0a0c] flex items-center justify-center relative overflow-hidden">
+        <TacticalOverlay />
+        <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(circle_at_50%_50%,#f43f5e_0%,transparent_50%)]"></div>
+        <div className="z-10 bg-surface border border-gray-800 p-8 rounded-sm shadow-2xl w-full max-w-md text-center">
+            <Lock size={40} className="mx-auto mb-4 text-rose-500" />
+            <h1 className="text-2xl font-bold text-white mb-2">ALMACENAMIENTO CIFRADO</h1>
+            <h2 className="text-sm text-rose-500 tracking-[0.3em] mb-8">INGRESA TU PASSPHRASE</h2>
+            <form onSubmit={handleUnlockVault} className="space-y-4">
+                <input
+                    type="password"
+                    value={vaultPassphrase}
+                    onChange={(e) => setVaultPassphrase(e.target.value)}
+                    placeholder="Passphrase..."
+                    title="Passphrase de cifrado"
+                    className="w-full bg-black/50 border border-gray-700 text-white p-3 rounded-lg focus:border-rose-500 focus:outline-none transition-colors"
+                    autoFocus
+                />
+                {vaultError && <p className="text-red-500 text-xs">{vaultError}</p>}
+                <button type="submit" disabled={vaultBusy} className="w-full bg-gradient-to-r from-slate-700 to-rose-600 text-white font-bold py-3 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50">
+                    {vaultBusy ? 'DESCIFRANDO...' : 'DESBLOQUEAR'}
+                </button>
+            </form>
+            <button onClick={handleWipeVault} className="mt-6 text-[11px] text-gray-600 hover:text-red-500 transition-colors underline">
+                ¿Olvidaste tu passphrase? Borrar datos cifrados
+            </button>
+        </div>
+      </div>
+    );
+  }
+
   if (!userProfile) {
     if (!bootDone) {
       return <BootSequence onDone={() => setBootDone(true)} />;
@@ -503,7 +631,50 @@ const App: FC = () => {
                     </div>
                 </div>
 
-                {/* 5. Panic Button */}
+                {/* 5. Local Storage Encryption */}
+                <div className="bg-[#0a0a0c] border border-gray-800 p-4 rounded-lg shadow-inner">
+                    <h3 className="text-[10px] text-gray-500 font-bold tracking-widest mb-3 uppercase flex items-center gap-2"><Lock size={12} /> Cifrado del Almacenamiento Local</h3>
+                    {encryptionEnabledFlag ? (
+                        <>
+                            <p className="text-xs text-green-500 flex items-center gap-2 mb-3"><span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Cifrado activo — sesiones y engagements protegidos con tu passphrase.</p>
+                            <button
+                                onClick={() => void handleDisableEncryption()}
+                                className="w-full py-2 bg-gray-800/50 hover:bg-gray-700/60 text-gray-300 border border-gray-700 rounded transition-colors text-xs font-bold"
+                            >
+                                DESACTIVAR CIFRADO
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            <p className="text-[10px] text-gray-500 mb-3">Protege el historial de sesiones y los engagements con una passphrase (AES-256, derivada vía PBKDF2). Si la olvidas, esos datos son irrecuperables — no hay forma de restaurarlos.</p>
+                            <input
+                                type="password"
+                                value={newPassphrase}
+                                onChange={(e) => setNewPassphrase(e.target.value)}
+                                placeholder="Nueva passphrase (mín. 8 caracteres)"
+                                title="Nueva passphrase de cifrado"
+                                className="w-full bg-black/50 border border-gray-700 text-white text-xs p-2 rounded mb-2 focus:border-rose-500 focus:outline-none"
+                            />
+                            <input
+                                type="password"
+                                value={confirmPassphrase}
+                                onChange={(e) => setConfirmPassphrase(e.target.value)}
+                                placeholder="Confirma la passphrase"
+                                title="Confirmar passphrase de cifrado"
+                                className="w-full bg-black/50 border border-gray-700 text-white text-xs p-2 rounded mb-2 focus:border-rose-500 focus:outline-none"
+                            />
+                            {encryptionSetupError && <p className="text-red-500 text-[10px] mb-2">{encryptionSetupError}</p>}
+                            <button
+                                onClick={() => void handleEnableEncryption()}
+                                className="w-full py-2 bg-rose-600 hover:bg-rose-500 text-white rounded transition-colors text-xs font-bold"
+                            >
+                                ACTIVAR CIFRADO
+                            </button>
+                        </>
+                    )}
+                </div>
+
+                {/* 6. Panic Button */}
                 <div className="pt-2">
                     <button
                         onClick={() => {
