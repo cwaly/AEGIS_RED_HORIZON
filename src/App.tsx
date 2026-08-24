@@ -36,11 +36,6 @@ const TOOLS_CONFIG: Tool[] = [
   { id: ModuleType.CIBER_INTEL_MISP, name: 'MISP Intel', description: 'Threat Hunting Feeds', icon: 'Activity', category: ModuleCategory.INTELLIGENCE },
   { id: ModuleType.DOXING_LEAKS, name: 'Doxing & Leaks', description: 'Correos y Fugas', icon: 'Database', category: ModuleCategory.INTELLIGENCE },
 
-  // 📚 Investigación de Vulnerabilidades & CTI (NUEVO)
-  { id: ModuleType.VULN_SEARCHSPLOIT, name: 'SearchSploit / CVE', description: 'Búsqueda de Exploits en Exploit-DB', icon: 'Database', category: ModuleCategory.VULN_RESEARCH },
-  { id: ModuleType.VULN_MITRE_OWASP, name: 'MITRE ATT&CK / OWASP', description: 'Tácticas, Técnicas y Top 10', icon: 'ShieldAlert', category: ModuleCategory.VULN_RESEARCH },
-  { id: ModuleType.VULN_CVSS_CALC, name: 'Calculadora CVSS', description: 'Métricas de Criticidad v3/v4', icon: 'Activity', category: ModuleCategory.VULN_RESEARCH },
-
   // 🎯 Recon & Bug Bounty
   { id: ModuleType.RECON_NMAP, name: 'Nmap', description: 'Port & Service Scan', icon: 'TerminalIcon', category: ModuleCategory.BUG_BOUNTY },
   { id: ModuleType.RECON_MASSCAN, name: 'Masscan', description: 'Escaneo asíncrono', icon: 'Zap', category: ModuleCategory.BUG_BOUNTY },
@@ -103,7 +98,6 @@ const TOOLS_CONFIG: Tool[] = [
 const CATEGORY_ACCENT: Record<ModuleCategory, string> = {
   [ModuleCategory.METHODOLOGY]: '#facc15',
   [ModuleCategory.INTELLIGENCE]: '#22d3ee',
-  [ModuleCategory.VULN_RESEARCH]: '#f59e0b',
   [ModuleCategory.BUG_BOUNTY]: '#f43f5e',
   [ModuleCategory.CLOUD_SECURITY]: '#38bdf8',
   [ModuleCategory.MOBILE_HACKING]: '#e879f9',
@@ -185,7 +179,6 @@ const App: FC = () => {
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({
     [ModuleCategory.METHODOLOGY]: true,
     [ModuleCategory.INTELLIGENCE]: false,
-    [ModuleCategory.VULN_RESEARCH]: false,
     [ModuleCategory.BUG_BOUNTY]: false,
     [ModuleCategory.CLOUD_SECURITY]: false,
     [ModuleCategory.MOBILE_HACKING]: false,

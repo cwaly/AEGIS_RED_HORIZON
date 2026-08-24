@@ -4,12 +4,18 @@ import { RESOURCE_LINKS, LinkCategory } from '../data/resourceLinks';
 
 const CATEGORY_ACCENT: Record<LinkCategory, string> = {
   [LinkCategory.METHODOLOGY]: '#facc15',
+  [LinkCategory.MITRE_OWASP]: '#a78bfa',
   [LinkCategory.CVSS]: '#f59e0b',
   [LinkCategory.CVE_EXPLOITS]: '#f43f5e',
   [LinkCategory.OSINT_PEOPLE]: '#22d3ee',
   [LinkCategory.OSINT_IMAGES]: '#e879f9',
   [LinkCategory.OSINT_INFRA]: '#38bdf8',
   [LinkCategory.HASH_CRYPTO]: '#10b981',
+  [LinkCategory.CTF_PRACTICE]: '#fb923c',
+  [LinkCategory.MALWARE_SANDBOX]: '#ef4444',
+  [LinkCategory.CLOUD_TOOLS]: '#0ea5e9',
+  [LinkCategory.MOBILE_TOOLS]: '#f472b6',
+  [LinkCategory.WIRELESS_NETWORK]: '#84cc16',
 };
 
 export const LinksPanel: FC = () => {
