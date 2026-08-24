@@ -1,5 +1,5 @@
 import { useState, useEffect, FC, FormEvent } from 'react';
-import { ModuleType, Message, Tool, ModuleCategory, UserProfile, AuditReport, AIProviderId, Language } from './types';
+import { ModuleType, Message, Tool, ModuleCategory, UserProfile, AuditReport, AIProviderId, Language, Engagement } from './types';
 import { initializeChat, sendMessage, generateReportData, toChatHistory, fetchHealth, HealthStatus } from './services/aiClient';
 import { Terminal } from './components/Terminal';
 import { Logo } from './components/Logo';
@@ -11,7 +11,8 @@ import {
   Terminal as TerminalIcon, Settings, FileText, Menu, X, ChevronDown,
   ChevronRight, Shield, Wifi, Globe, Database, Lock, Server, Eye, Zap,
   Cpu, Bug, Smartphone, Cloud, Crosshair, Search, Key,
-  Radio, List, Activity, Target, ShieldAlert, FolderSearch, Fingerprint, Users, Home, LogOut, AlertTriangle, HardDrive, Route, GraduationCap, FlaskConical, Link2
+  Radio, List, Activity, Target, ShieldAlert, FolderSearch, Fingerprint, Users, Home, LogOut, AlertTriangle, HardDrive, Route, GraduationCap, FlaskConical, Link2,
+  Briefcase, Plus, Trash2
 } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -121,6 +122,36 @@ const loadSessionsFromStorage = (): Record<string, Message[]> => {
   }
 };
 
+const sessionKey = (engagementId: string, module: string) => `${engagementId}::${module}`;
+
+// Un "engagement" agrupa las sesiones por target/cliente. Antes de que existiera este
+// concepto, las sesiones vivían en localStorage con el moduleId como clave plana; esta
+// migración las mueve una sola vez a un engagement por defecto sin perder el historial.
+const loadEngagementsAndSessions = (): { engagements: Engagement[]; activeEngagementId: string; sessions: Record<string, Message[]> } => {
+  const rawSessions = loadSessionsFromStorage();
+  let engagements: Engagement[] = [];
+  try {
+    const saved = localStorage.getItem('aegis_engagements');
+    if (saved) engagements = JSON.parse(saved);
+  } catch {
+    engagements = [];
+  }
+
+  if (engagements.length === 0) {
+    const defaultEngagement: Engagement = { id: uuidv4(), name: 'Engagement por defecto', createdAt: new Date().toISOString() };
+    const migrated: Record<string, Message[]> = {};
+    Object.entries(rawSessions).forEach(([key, msgs]) => {
+      const newKey = key.includes('::') ? key : sessionKey(defaultEngagement.id, key);
+      migrated[newKey] = msgs;
+    });
+    return { engagements: [defaultEngagement], activeEngagementId: defaultEngagement.id, sessions: migrated };
+  }
+
+  const savedActiveId = localStorage.getItem('aegis_active_engagement');
+  const activeEngagementId = (savedActiveId && engagements.some(e => e.id === savedActiveId)) ? savedActiveId : engagements[0].id;
+  return { engagements, activeEngagementId, sessions: rawSessions };
+};
+
 const App: FC = () => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(() => {
     const saved = localStorage.getItem('aegis_user_profile');
@@ -164,11 +195,24 @@ const App: FC = () => {
   const [currentView, setCurrentView] = useState<'dashboard' | 'module' | 'links'>('dashboard');
   const [activeModule, setActiveModule] = useState<ModuleType>(ModuleType.RECON_NMAP);
 
-  const [sessionsData, setSessionsData] = useState<Record<string, Message[]>>(loadSessionsFromStorage);
+  const [initState] = useState(loadEngagementsAndSessions);
+  const [engagements, setEngagements] = useState<Engagement[]>(initState.engagements);
+  const [activeEngagementId, setActiveEngagementId] = useState<string>(initState.activeEngagementId);
+  const [sessionsData, setSessionsData] = useState<Record<string, Message[]>>(initState.sessions);
+  const [engagementMenuOpen, setEngagementMenuOpen] = useState(false);
+  const [newEngagementName, setNewEngagementName] = useState('');
 
   useEffect(() => {
     localStorage.setItem('aegis_sessions', JSON.stringify(sessionsData));
   }, [sessionsData]);
+
+  useEffect(() => {
+    localStorage.setItem('aegis_engagements', JSON.stringify(engagements));
+  }, [engagements]);
+
+  useEffect(() => {
+    localStorage.setItem('aegis_active_engagement', activeEngagementId);
+  }, [activeEngagementId]);
 
   const [isLoading, setIsLoading] = useState(false);
   const [reportData, setReportData] = useState<AuditReport | null>(null);
@@ -211,21 +255,22 @@ const App: FC = () => {
     setUserProfile({ name: cleanName, initials: initials.toUpperCase(), role: 'Senior Auditor' });
   };
 
-  const addMessage = (module: string, content: string, role: 'user' | 'model' | 'system') => {
+  const addMessage = (engagementId: string, module: string, content: string, role: 'user' | 'model' | 'system') => {
+    const key = sessionKey(engagementId, module);
     const newMessage: Message = { id: uuidv4(), role, content, timestamp: new Date() };
     setSessionsData(prev => ({
         ...prev,
-        [module]: [...(prev[module] || []), newMessage]
+        [key]: [...(prev[key] || []), newMessage]
     }));
   };
 
-  const runInitFlow = async (module: ModuleType) => {
+  const runInitFlow = async (engagementId: string, module: ModuleType) => {
     setIsLoading(true);
     try {
       const reply = await initializeChat(module, aiProvider, language);
-      addMessage(module, reply, 'model');
+      addMessage(engagementId, module, reply, 'model');
     } catch (e) {
-      addMessage(module, `Error crítico: Fallo en inicialización de IA (${aiProvider === 'gemini' ? 'Gemini' : 'Ollama Local'}). Verifica el motor en OPSEC & SYSTEM.`, 'system');
+      addMessage(engagementId, module, `Error crítico: Fallo en inicialización de IA (${aiProvider === 'gemini' ? 'Gemini' : 'Ollama Local'}). Verifica el motor en OPSEC & SYSTEM.`, 'system');
     } finally {
       setIsLoading(false);
     }
@@ -235,57 +280,100 @@ const App: FC = () => {
     setActiveModule(module);
     setCurrentView('module');
 
-    if (sessionsData[module] && sessionsData[module].length > 0) {
+    const key = sessionKey(activeEngagementId, module);
+    if (sessionsData[key] && sessionsData[key].length > 0) {
         return;
     }
 
-    void runInitFlow(module);
+    void runInitFlow(activeEngagementId, module);
   };
 
   const handleUserMessage = async (text: string) => {
     const currentMod = activeModule;
-    const history = toChatHistory(sessionsData[currentMod] || []);
-    addMessage(currentMod, text, 'user');
+    const currentEng = activeEngagementId;
+    const history = toChatHistory(sessionsData[sessionKey(currentEng, currentMod)] || []);
+    addMessage(currentEng, currentMod, text, 'user');
     setIsLoading(true);
     try {
       const response = await sendMessage(currentMod, aiProvider, language, history, text);
-      addMessage(currentMod, response, 'model');
+      addMessage(currentEng, currentMod, response, 'model');
     } catch (e) {
-      addMessage(currentMod, "Error de conexión con el núcleo de IA.", 'system');
+      addMessage(currentEng, currentMod, "Error de conexión con el núcleo de IA.", 'system');
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleGenerateReport = async () => {
+    const currentMod = activeModule;
+    const currentEng = activeEngagementId;
     setIsLoading(true);
-    addMessage(activeModule, "Iniciando compilación de evidencias...", 'system');
+    addMessage(currentEng, currentMod, "Iniciando compilación de evidencias...", 'system');
     try {
-        const history = toChatHistory(sessionsData[activeModule] || []);
-        const report = await generateReportData(activeModule, aiProvider, language, history, userProfile?.name || 'Unknown');
+        const history = toChatHistory(sessionsData[sessionKey(currentEng, currentMod)] || []);
+        const report = await generateReportData(currentMod, aiProvider, language, history, userProfile?.name || 'Unknown');
         if (report) {
             setReportData(report);
             setIsReportModalOpen(true);
-            addMessage(activeModule, "Reporte generado exitosamente.", 'system');
+            addMessage(currentEng, currentMod, "Reporte generado exitosamente.", 'system');
         } else {
-            addMessage(activeModule, "Error generando reporte: La IA no devolvió datos estructurados válidos.", 'system');
+            addMessage(currentEng, currentMod, "Error generando reporte: La IA no devolvió datos estructurados válidos.", 'system');
         }
     } catch (e) {
-        addMessage(activeModule, "Error crítico al generar reporte.", 'system');
+        addMessage(currentEng, currentMod, "Error crítico al generar reporte.", 'system');
     } finally {
         setIsLoading(false);
     }
   };
 
   const handleClearSession = async () => {
-    setSessionsData(prev => ({ ...prev, [activeModule]: [] }));
-    await runInitFlow(activeModule);
+    const key = sessionKey(activeEngagementId, activeModule);
+    setSessionsData(prev => ({ ...prev, [key]: [] }));
+    await runInitFlow(activeEngagementId, activeModule);
+  };
+
+  const activeEngagement = engagements.find(e => e.id === activeEngagementId);
+
+  const handleSwitchEngagement = (id: string) => {
+    setActiveEngagementId(id);
+    setEngagementMenuOpen(false);
+    if (currentView === 'module') {
+      const key = sessionKey(id, activeModule);
+      if (!sessionsData[key] || sessionsData[key].length === 0) {
+        void runInitFlow(id, activeModule);
+      }
+    }
+  };
+
+  const handleCreateEngagement = () => {
+    const name = newEngagementName.trim();
+    if (!name) return;
+    const newEng: Engagement = { id: uuidv4(), name, createdAt: new Date().toISOString() };
+    setEngagements(prev => [...prev, newEng]);
+    setActiveEngagementId(newEng.id);
+    setNewEngagementName('');
+    setEngagementMenuOpen(false);
+  };
+
+  const handleDeleteEngagement = (id: string) => {
+    if (engagements.length <= 1) return;
+    if (!window.confirm('¿Eliminar este engagement y todas sus sesiones? Esta acción no se puede deshacer.')) return;
+    setEngagements(prev => prev.filter(e => e.id !== id));
+    setSessionsData(prev => {
+      const next = { ...prev };
+      Object.keys(next).forEach(k => { if (k.startsWith(`${id}::`)) delete next[k]; });
+      return next;
+    });
+    if (activeEngagementId === id) {
+      const remaining = engagements.filter(e => e.id !== id);
+      setActiveEngagementId(remaining[0]?.id ?? '');
+    }
   };
 
   const activeToolObj = TOOLS_CONFIG.find(t => t.id === activeModule);
   const activeToolName = activeToolObj ? activeToolObj.name.toUpperCase() : activeModule;
 
-  const currentMessages = sessionsData[activeModule] || [];
+  const currentMessages = sessionsData[sessionKey(activeEngagementId, activeModule)] || [];
 
   if (!userProfile) {
     if (!bootDone) {
@@ -450,6 +538,45 @@ const App: FC = () => {
             LINK STABLE
           </span>
           <span>{clock}</span>
+        </div>
+        <div className="px-4 py-2 mt-2 relative">
+          <button
+            onClick={() => setEngagementMenuOpen(o => !o)}
+            className="w-full flex items-center justify-between gap-2 px-3 py-2 bg-[#0a0a0c] border border-gray-800 rounded-lg text-left hover:border-gray-700 transition-colors"
+          >
+            <div className="flex items-center gap-2 overflow-hidden">
+              <Briefcase size={14} className="text-rose-500 shrink-0" />
+              <div className="overflow-hidden">
+                <div className="text-xs font-bold text-white truncate">{activeEngagement?.name || 'Sin engagement'}</div>
+                {activeEngagement?.target && <div className="text-[10px] text-gray-500 truncate">{activeEngagement.target}</div>}
+              </div>
+            </div>
+            <ChevronDown size={14} className="text-gray-500 shrink-0" />
+          </button>
+          {engagementMenuOpen && (
+            <div className="absolute left-4 right-4 mt-1 z-50 bg-[#0a0a0c] border border-gray-800 rounded-lg p-2 space-y-1 shadow-2xl max-h-64 overflow-y-auto">
+              {engagements.map(eng => (
+                <div key={eng.id} className={`flex items-center justify-between gap-2 px-2 py-1.5 rounded ${eng.id === activeEngagementId ? 'bg-rose-500/10 text-white' : 'text-gray-400 hover:bg-white/5'}`}>
+                  <button onClick={() => handleSwitchEngagement(eng.id)} className="flex-1 text-left text-xs truncate">{eng.name}</button>
+                  {engagements.length > 1 && (
+                    <button onClick={() => handleDeleteEngagement(eng.id)} title="Eliminar engagement" aria-label="Eliminar engagement" className="text-gray-600 hover:text-red-500 shrink-0"><Trash2 size={12} /></button>
+                  )}
+                </div>
+              ))}
+              <div className="pt-2 border-t border-gray-800 flex gap-1">
+                <input
+                  type="text"
+                  value={newEngagementName}
+                  onChange={(e) => setNewEngagementName(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') handleCreateEngagement(); }}
+                  placeholder="Nombre / target nuevo..."
+                  title="Nombre del nuevo engagement"
+                  className="flex-1 bg-black/40 border border-gray-700 text-white text-xs px-2 py-1.5 rounded focus:border-rose-500 focus:outline-none"
+                />
+                <button onClick={handleCreateEngagement} title="Crear engagement" aria-label="Crear engagement" className="px-2 bg-rose-600 hover:bg-rose-500 text-white rounded transition-colors"><Plus size={14} /></button>
+              </div>
+            </div>
+          )}
         </div>
         <div className="px-4 py-2 mt-2 space-y-1">
           <button onClick={() => setCurrentView('dashboard')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${currentView === 'dashboard' ? 'bg-rose-500/20 text-white border border-rose-500/50' : 'text-gray-400 hover:bg-white/5'}`}><Home size={18} /><span className="font-bold text-sm">DASHBOARD</span></button>

@@ -119,6 +119,13 @@ export interface UserProfile {
 
 export type Language = 'es' | 'en';
 
+export interface Engagement {
+  id: string;
+  name: string;
+  target?: string;
+  createdAt: string;
+}
+
 export interface EvidenceImage {
   id: string;
   dataUrl: string;
