@@ -5,7 +5,7 @@
   <p><strong>Plataforma de Operaciones de Red Team Asistida por IA (C2 Intelligence Core)</strong></p>
 
   <p>
-    <a href="https://github.com/cwaly/AEGIS_RED_HORIZON/releases"><img src="https://img.shields.io/badge/version-1.2-blue.svg" alt="Version"></a>
+    <a href="https://github.com/cwaly/AEGIS_RED_HORIZON/releases"><img src="https://img.shields.io/badge/version-2.0-blue.svg" alt="Version"></a>
     <a href="https://docker.com"><img src="https://img.shields.io/badge/docker-ready-blue" alt="Docker"></a>
     <a href="https://img.shields.io/badge/AI-Gemini%203.7%20Flash-purple"><img src="https://img.shields.io/badge/AI-Gemini%203.7-purple" alt="AI"></a>
     <a href="https://ollama.com"><img src="https://img.shields.io/badge/Local%20AI-Ollama%20Ready-10b981" alt="Local AI"></a>
