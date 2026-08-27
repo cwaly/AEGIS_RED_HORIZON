@@ -16,7 +16,10 @@ services:
     container_name: aegis-red-horizon
     restart: unless-stopped
     env_file:
-      - .env
+      # Opcional: si aún no tienes .env, el contenedor arranca igual y luego
+      # configuras las claves. Copia .env.example -> .env para empezar.
+      - path: .env
+        required: false
     environment:
       # Si AEGIS_PORT no está en .env, cae a 1337 (mismo default que el resto).
       AEGIS_PORT: ${AEGIS_PORT:-1337}

@@ -134,13 +134,16 @@ La forma más limpia y profesional.
 **Con `docker compose` (recomendado):**
 
 ```bash
+cp .env.example .env              # (opcional) y rellena tus claves
 docker compose up -d --build      # levantar / reconstruir tras un git pull
 docker compose logs -f            # ver logs
 docker compose down               # parar y borrar el contenedor
 ```
 
 El `docker-compose.yml` lee `AEGIS_PORT` de tu `.env` y lo aplica a la vez al
-contenedor y al host, así que el puerto nunca se descuadra. Acceso: `http://localhost:<AEGIS_PORT>` (1337 por defecto).
+contenedor y al host, así que el puerto nunca se descuadra. Acceso: `http://localhost:<AEGIS_PORT>` (1337 por defecto). El `.env` es opcional para arrancar: sin él el contenedor sube igual y configuras las claves después.
+
+⚠️ Si ya tienes un contenedor `aegis-red-horizon` de un `docker run` anterior, bórralo primero (`docker rm -f aegis-red-horizon`) o compose fallará con un error de nombre en uso.
 
 **Manual (sin compose):**
 
