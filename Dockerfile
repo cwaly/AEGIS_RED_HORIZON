@@ -10,7 +10,9 @@ RUN npm run build
 FROM node:20-alpine AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
-ENV PORT=1337
+# Puerto único que sirve el frontend + /api. Overridable en `docker run` con
+# `-e AEGIS_PORT=3000 -p 3000:3000` (útil si el host tiene 1337 reservado).
+ENV AEGIS_PORT=1337
 # Dentro del contenedor, 127.0.0.1 apunta al propio contenedor, no al host --
 # host.docker.internal es como Docker Desktop (Win/Mac) alcanza servicios del
 # host, como un Ollama corriendo fuera del contenedor. Si .env define
@@ -26,7 +28,8 @@ RUN npm install --omit=dev
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/dist-server ./dist-server
 
-# 6. Exponer el puerto hacker 1337
+# 6. Exponer el puerto hacker por defecto (1337). Si cambias AEGIS_PORT,
+# ajusta también el -p de `docker run` (EXPOSE es solo documentación).
 EXPOSE 1337
 
 # 7. El servidor Express (compilado a JS nativo) sirve el build estático y expone /api (Gemini/Ollama)

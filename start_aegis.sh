@@ -8,6 +8,14 @@ echo ""
 # Navegar al directorio donde esta el script
 cd "$(dirname "$0")"
 
+# Puerto del frontend (default 1337). Prioridad: variable de entorno ya
+# exportada > AEGIS_PORT=... en .env (sin comentar) > 1337. Cambialo si 1337
+# esta reservado por el SO y ves "listen EACCES" al arrancar.
+if [ -z "$AEGIS_PORT" ] && [ -f ".env" ]; then
+    AEGIS_PORT=$(grep -E '^[[:space:]]*AEGIS_PORT[[:space:]]*=' .env | tail -n1 | cut -d= -f2- | tr -d ' "'"'"'\r')
+fi
+AEGIS_PORT="${AEGIS_PORT:-1337}"
+
 # Comprobar si Node.js esta instalado
 if ! command -v npm &> /dev/null
 then
@@ -21,7 +29,7 @@ if [ ! -d "node_modules" ]; then
     npm install
 fi
 
-# --- Verificacion de puertos ocupados (frontend 1337 / AI Gateway 4000) ---
+# --- Verificacion de puertos ocupados (frontend $AEGIS_PORT / AI Gateway 4000) ---
 # Si un cierre anterior dejo procesos huerfanos (u otro proyecto usa estos
 # puertos), avisamos con detalle en vez de abrir el navegador contra un
 # servidor equivocado o inexistente.
@@ -43,7 +51,7 @@ find_port_pid() {
 }
 
 PORT_BUSY=0
-for PORT in 1337 4000; do
+for PORT in "$AEGIS_PORT" 4000; do
     PID=$(find_port_pid "$PORT")
     if [ -n "$PID" ]; then
         echo "[ERROR] El puerto $PORT ya esta en uso por el proceso PID $PID:"
@@ -59,9 +67,11 @@ if [ "$PORT_BUSY" -eq 1 ]; then
     exit 1
 fi
 
-echo "[INFO] Levantando servidor tactico (frontend :1337 + AI Gateway :4000)..."
+echo "[INFO] Levantando servidor tactico (frontend :$AEGIS_PORT + AI Gateway :4000)..."
 
-# Iniciar Vite + AI Gateway en segundo plano
+# Iniciar Vite + AI Gateway en segundo plano. Exportamos AEGIS_PORT para que
+# Vite lo tome aunque solo viniera de .env o del default de este script.
+export AEGIS_PORT
 npm run dev &
 DEV_PID=$!
 
@@ -76,7 +86,7 @@ trap cleanup EXIT INT TERM
 echo "[INFO] Esperando a que la plataforma responda..."
 READY=0
 for i in $(seq 1 30); do
-    if curl -s -o /dev/null http://localhost:1337; then
+    if curl -s -o /dev/null http://localhost:$AEGIS_PORT; then
         READY=1
         break
     fi
@@ -90,11 +100,11 @@ else
 fi
 
 if command -v xdg-open &> /dev/null; then
-    xdg-open http://localhost:1337
+    xdg-open http://localhost:$AEGIS_PORT
 elif command -v open &> /dev/null; then
-    open http://localhost:1337
+    open http://localhost:$AEGIS_PORT
 else
-    echo "[INFO] Por favor, abre tu navegador manualmente en: http://localhost:1337"
+    echo "[INFO] Por favor, abre tu navegador manualmente en: http://localhost:$AEGIS_PORT"
 fi
 
 # Mantener la terminal abierta hasta que el usuario detenga la plataforma

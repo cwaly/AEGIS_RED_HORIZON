@@ -120,7 +120,13 @@ if (fs.existsSync(distPath)) {
   });
 }
 
-const PORT = Number(process.env.PORT) || 4000;
+// Dev: el script `dev:server` fija PORT=4000 (gateway interno).
+// Prod/Docker: puerto único que sirve estático + API. Orden de preferencia:
+// PORT (compat. PaaS) -> AEGIS_PORT -> 1337 en producción, 4000 en dev.
+const PORT =
+  Number(process.env.PORT) ||
+  Number(process.env.AEGIS_PORT) ||
+  (process.env.NODE_ENV === 'production' ? 1337 : 4000);
 app.listen(PORT, () => {
   console.log('\x1b[32m%s\x1b[0m', `✅ AEGIS CORE (AI Gateway) escuchando en puerto ${PORT}`);
   console.log(isGeminiConfigured() ? '   · Gemini 3.7 (Cloud): configurado' : '   · Gemini 3.7 (Cloud): SIN configurar (falta GEMINI_API_KEY en .env)');

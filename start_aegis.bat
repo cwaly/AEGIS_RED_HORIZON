@@ -12,6 +12,21 @@ echo.
 :: Navegar al directorio donde esta el archivo .bat
 cd /d "%~dp0"
 
+:: Puerto del frontend (default 1337). Prioridad: variable de entorno ya
+:: definida > AEGIS_PORT=... en .env (sin comentar) > 1337. Cambialo si 1337
+:: esta reservado por el SO (EACCES al arrancar).
+if not defined AEGIS_PORT (
+    if exist ".env" (
+        for /f "usebackq tokens=1,* delims== " %%K in (".env") do (
+            if /i "%%K"=="AEGIS_PORT" set "AEGIS_PORT=%%L"
+        )
+    )
+)
+if not defined AEGIS_PORT set "AEGIS_PORT=1337"
+:: Quitar comillas y espacios sobrantes si vinieran del .env
+set "AEGIS_PORT=%AEGIS_PORT:"=%"
+for /f "tokens=* delims= " %%V in ("%AEGIS_PORT%") do set "AEGIS_PORT=%%V"
+
 :: Comprobar si Node.js esta instalado
 where npm >nul 2>nul
 if %errorlevel% neq 0 (
@@ -26,12 +41,12 @@ if not exist "node_modules\" (
     call npm install
 )
 
-:: --- Verificacion de puertos ocupados (frontend 1337 / AI Gateway 4000) ---
+:: --- Verificacion de puertos ocupados (frontend %AEGIS_PORT% / AI Gateway 4000) ---
 :: Si un cierre anterior dejo procesos huerfanos (u otro proyecto usa estos
 :: puertos), avisamos con detalle en vez de abrir el navegador contra un
 :: servidor equivocado o inexistente.
 set PORT_BUSY=0
-for %%P in (1337 4000) do (
+for %%P in (%AEGIS_PORT% 4000) do (
     for /f "tokens=5" %%A in ('netstat -ano ^| findstr /R /C:":%%P .*LISTENING"') do (
         if not "!REPORTED_%%A!"=="1" (
             set REPORTED_%%A=1
@@ -50,14 +65,14 @@ if "%PORT_BUSY%"=="1" (
     exit /b 1
 )
 
-echo [INFO] Levantando servidor tactico ^(frontend :1337 + AI Gateway :4000^)...
+echo [INFO] Levantando servidor tactico ^(frontend :%AEGIS_PORT% + AI Gateway :4000^)...
 start "AEGIS Red Horizon - Server" cmd /k npm run dev
 
 echo [INFO] Esperando a que la plataforma responda...
 set READY=0
 for /l %%i in (1,1,30) do (
     if "!READY!"=="0" (
-        curl -s -o nul http://localhost:1337
+        curl -s -o nul http://localhost:%AEGIS_PORT%
         if not errorlevel 1 (
             set READY=1
         ) else (
@@ -71,7 +86,7 @@ if "%READY%"=="1" (
 ) else (
     echo [AVISO] La plataforma esta tardando en responder. Revisa la ventana "AEGIS Red Horizon - Server" por errores ^(p.ej. falta GEMINI_API_KEY en .env^).
 )
-start http://localhost:1337
+start http://localhost:%AEGIS_PORT%
 
 echo.
 echo [INFO] AEGIS corre en la ventana "AEGIS Red Horizon - Server". Cierra esa ventana ^(o Ctrl+C dentro de ella^) para detener la plataforma por completo.

@@ -9,7 +9,7 @@
     "dev": "concurrently -k -n WEB,API -c cyan,magenta \"vite\" \"npm:dev:server\"",
     "dev:server": "cross-env PORT=4000 tsx watch server/index.ts",
     "build": "tsc && tsc -p tsconfig.server.json && vite build",
-    "start": "cross-env NODE_ENV=production PORT=1337 node dist-server/index.js",
+    "start": "cross-env NODE_ENV=production node dist-server/index.js",
     "preview": "vite preview"
   },
   "dependencies": {

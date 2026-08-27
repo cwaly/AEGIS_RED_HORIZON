@@ -51,8 +51,9 @@ Inyecta las credenciales que vayas a usar:
 
 - `GEMINI_API_KEY=tu_clave_aqui` (motor CLOUD)
 - `OLLAMA_BASE_URL=http://127.0.0.1:11434` y `OLLAMA_MODEL=dolphin3` (motor LOCAL, sin censura)
+- `AEGIS_PORT=1337` (opcional) — puerto del frontend. Cámbialo si tu SO lo tiene reservado (en Windows con Hyper-V/WSL2/Docker es habitual; el síntoma es `listen EACCES: permission denied 0.0.0.0:1337` al arrancar). Lo respetan los scripts, Vite y Docker por igual.
 
-Despliega la plataforma (start_aegis.bat en Windows, o start_aegis.sh en Linux/macOS). El sistema se levantará en el puerto táctico TCP/1337 (frontend), con el AI Gateway detrás en el puerto 4000 durante desarrollo.
+Despliega la plataforma (start_aegis.bat en Windows, o start_aegis.sh en Linux/macOS). El sistema se levantará en el puerto táctico TCP/1337 (frontend, configurable vía `AEGIS_PORT`), con el AI Gateway detrás en el puerto 4000 durante desarrollo.
 
 🧠 Fase 1.5: Doctrina Cloud vs Local
 AEGIS opera con dos núcleos de IA intercambiables en caliente desde el panel OPSEC:

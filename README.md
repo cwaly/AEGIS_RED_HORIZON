@@ -142,6 +142,8 @@ La forma más limpia y profesional.
 
     ⚠️ `--restart unless-stopped` hace que el contenedor se reinicie solo si Docker Desktop/WSL2 lo mata en segundo plano (código de salida 137, común tras suspender la máquina o reiniciar Docker Desktop) — evita tener que levantarlo a mano cada vez.
 
+    ⚠️ **Puerto reservado por el SO.** Si el `docker run` falla al publicar el puerto (o en local ves `listen EACCES: permission denied 0.0.0.0:1337`), es que Windows tiene el 1337 en un rango reservado por Hyper-V/WSL2/Docker (`netsh int ipv4 show excludedportrange protocol=tcp`). Usa otro puerto: `-e AEGIS_PORT=3000 -p 3000:3000 ...` (y entra a `http://localhost:3000`).
+
 3. Acceso: Entra en tu navegador a http://localhost:1337
 
 Opción B: Ejecución Local Automatizada (Windows / Linux)
@@ -161,6 +163,9 @@ abren tu navegador de forma automática.
     GEMINI_API_KEY=tu_clave_aqui
     OLLAMA_BASE_URL=http://127.0.0.1:11434
     OLLAMA_MODEL=dolphin3
+    # Opcional. Puerto donde abres AEGIS (default 1337). Cámbialo si tu SO
+    # lo tiene reservado y ves "listen EACCES" al arrancar:
+    # AEGIS_PORT=3000
     ```
 
 3 Lanzar la plataforma:
@@ -199,6 +204,17 @@ start_aegis no arranca / navegador        Los scripts detectan si los puertos 13
 abre una página rota o de otro proyecto   instancia anterior que no cerró bien) y te muestran el proceso exacto que los
                                           tiene tomados, con el comando para liberarlo (taskkill /F /PID en Windows,
                                           kill en Linux/macOS). Ciérralo y vuelve a lanzar el script.
+----------------------------------------------------------------------------------------------------------------------------------
+listen EACCES: permission denied          El puerto 1337 NO está ocupado: Windows lo tiene RESERVADO en un rango de
+0.0.0.0:1337  (local y Docker)            Hyper-V/WSL2/Docker. Compruébalo con
+                                          "netsh int ipv4 show excludedportrange protocol=tcp" (si 1337 cae dentro de un
+                                          rango, ese es el motivo). Dos arreglos:
+                                          (A) Recuperar el 1337 — PowerShell como Admin:
+                                              net stop winnat
+                                              netsh int ipv4 add excludedportrange protocol=tcp startport=1337 numberofports=1 store=persistent
+                                              net start winnat        (y reinicia Docker Desktop)
+                                          (B) Usar otro puerto: AEGIS_PORT=3000 en .env (o export/-e AEGIS_PORT=3000).
+                                              Los scripts, Vite y Docker lo respetan; en Docker ajusta también -p 3000:3000.
 ----------------------------------------------------------------------------------------------------------------------------------
 Botón del Pánico activado                 Si usaste el Panic Button, la caché se ha purgado. 
                                           Solo vuelve a ingresar tu alias para reconectar con el C2.
