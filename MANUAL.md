@@ -1,16 +1,18 @@
-# <img src="./assets/0_Logo.jpg" width="35" align="absmiddle" style="border-radius: 50%;"/> AEGIS: MANUAL DE OPERACIONES Y DOCTRINA
+# <img src="./assets/0_Logo.jpg" alt="Logo AEGIS" width="35" align="absmiddle" style="border-radius: 50%;"/> AEGIS: MANUAL DE OPERACIONES Y DOCTRINA
+
 Clasificación: USO INTERNO / AUDITORES AUTORIZADOS
 
 Arquitecto: César Matute (Auditor)
 
 Sistema: Red Horizon C2 Intelligence Core
 
-1. GÉNESIS: El Ecosistema AEGIS y la Doctrina Operativa
+## 1. GÉNESIS: El Ecosistema AEGIS y la Doctrina Operativa
+
 En el panorama actual de la ciberseguridad, los equipos de Red Team a menudo se encuentran saturados gestionando decenas de herramientas desconectadas, perdiendo tiempo valioso en la sintaxis técnica en lugar de centrarse en la estrategia del ataque.
 
 Para solucionar esto, nace AEGIS. Un ecosistema unificado de ciberseguridad que abarca el ciclo completo de una auditoría y gestión de riesgos:
 
-AEGIS: Governance (GRC): La herramienta de trabajo diario del equipo auditor para llevar auditorías de cumplimiento multinorma de principio a fin — no solo ISO 27001, sino ISO 9001/14001/45001/42001 (IA), ENS, NIS2, DORA, RGPD/LOPDGDD, PCI DSS y sostenibilidad/huella de carbono (ISO 14064), activando únicamente las normativas que aplican a cada cliente. Se sube evidencia técnica real (PDF, DOCX, XLSX, reportes Nmap/Nessus/OpenVAS, hasta 100 MB por archivo), un motor de IA dual (Gemini en la nube u Ollama 100% local, sin salir de la máquina del auditor) la mapea al control correspondiente, y desde ahí el hallazgo recorre su propio ciclo — revisión, valoración de riesgo (MAGERIT v3 o NIST SP 800-30 según la región del cliente), exportación del entregable formal (SOA, Matriz de Riesgos ISO 31000, BIA, tablero Scrum multinorma). Es una herramienta interna de la auditoría, sin registro público ni acceso de cliente, multi-tenant aislado por proyecto en PostgreSQL, y con Zero Data Retention en Gemini para cumplir el EU AI Act.
+AEGIS: Governance (GRC): La herramienta de trabajo diario del equipo auditor para llevar auditorías de cumplimiento multinorma de principio a fin — no solo ISO 27001, sino ISO 9001/14001/45001/42001 (IA), ENS, NIS2, DORA, RGPD/LOPDGDD, PCI DSS y sostenibilidad/huella de carbono (ISO 14064), activando únicamente las normativas que aplican a cada cliente. Se sube evidencia técnica real (PDF, DOCX, XLSX, reportes Nmap/Nessus/OpenVAS, hasta 100 MB por archivo), un motor de IA dual (Gemini en la nube u Ollama 100% local, sin salir de la máquina del auditor) la mapea al control correspondiente, y desde ahí el hallazgo recorre su propio ciclo — revisión, valoración de riesgo (MAGERIT v3 o NIST SP 800-30 según la región del cliente), exportación del entregable formal (SOA, Matriz de Riesgos ISO 31000, BIA, tablero Scrum multinorma). Es una herramienta interna de la auditoría, sin registro público ni acceso de cliente, multi-tenant aislado por proyecto en PostgreSQL, y con Zero Data Retention en Gemini para cumplir el EU AI Act - Reglamento 2024/1689: Nos amparamos en el Artículo 10 (Gobernanza de Datos) y el Artículo 13 (Transparencia). La plataforma informa claramente al usuario de que interactúa con un sistema de IA y garantiza que los datos se manejan bajo estrictos estándares de calidad y privacidad, sin sesgos. | Privacidad (RGPD - Artículo 28): Al conectarnos mediante API de pago (Enterprise) y no mediante la interfaz web gratuita, los proveedores (como Google Gemini) actúan legalmente como 'Encargados del Tratamiento' bajo el Artículo 28 del RGPD. Firman un DPA (Data Processing Agreement) de Zero Data Retention, lo que garantiza por contrato que los datos se procesan en la memoria RAM del servidor y se destruyen inmediatamente, con prohibición legal y técnica de usarlos para entrenar sus propios modelos..
 
 AEGIS: Vanguard Core: Plataforma de monitorización y defensa activa que actúa como puente táctico-GRC, traduciendo hallazgos técnicos en métricas de impacto financiero y desviación normativa para que la Alta Dirección (C-Level) tome decisiones basadas en inteligencia de amenazas en tiempo real. Organizada en 19 paneles con lógica de negocio y persistencia real (nada simulado): Panel Ejecutivo con KPIs de C-Level, Matriz GRC (generador automático de SOA sobre 41 marcos normativos en la región Europa), Riesgo de Terceros (TPRM), Impacto Financiero (BIA), Continuidad BCP/DRP, Inventario TI (CMDB) con autodescubrimiento de activos vía agente propio o escaneo agentless, Vulnerabilidades enlazadas al CMDB con SLA configurable por normativa, Seguridad Cloud (CSPM), Ingesta Técnica multiformato (Nessus, OpenVAS, Wazuh, Burp, EDR, Trivy, ZAP, SARIF...), Ciber Inteligencia (OSINT) con correlación MITRE ATT&CK/OWASP, SOC (SIEM) con Live Feed en tiempo real, SOAR, Caza de Amenazas, Dark Web/OSINT, Laboratorio Forense (DFIR), DevSecOps, Concienciación (riesgo humano) y ESG/RRHH. Comparte el mismo motor de IA dual (Gemini/Ollama) y la misma filosofía de soberanía de datos que el resto del ecosistema AEGIS.
 
@@ -28,7 +30,8 @@ Post-Explotación y Borrado de Huellas: Escalada de privilegios, persistencia y 
 
 Reporte (Reporting & DFIR): Análisis forense y evidencias.
 
-2. DECODIFICANDO LA IDENTIDAD VISUAL
+## 2. DECODIFICANDO LA IDENTIDAD VISUAL
+
 El logo de Red Horizon fusiona la herencia de la familia AEGIS con la agresividad de las operaciones ofensivas.
 
 🛡️ El Escudo Robusto Central: Representa la herencia de AEGIS Vanguard Core y AEGIS Governance. El control absoluto de la información.
@@ -37,15 +40,17 @@ El logo de Red Horizon fusiona la herencia de la familia AEGIS con la agresivida
 
 🔻 La Flecha Perforante (Red Horizon): Una línea roja que atraviesa el escudo de abajo hacia arriba. Representa el "Red Team": encontrar la vulnerabilidad, romper el perímetro y penetrar en la infraestructura del objetivo.
 
-3. MANUAL DE USO OPERATIVO Y OPSEC
+## 3. MANUAL DE USO OPERATIVO Y OPSEC
+
 🚀 Fase 1: Despliegue y Seguridad Operativa (OPSEC)
 Red Horizon opera bajo estrictos estándares de seguridad. Ninguna API Key toca jamás el navegador: viven exclusivamente en el AI Gateway (backend Express) que corre junto al frontend.
 
-Crea un archivo .env en la raíz del proyecto.
+Crea un archivo `.env` en la raíz del proyecto.
 
 Inyecta las credenciales que vayas a usar:
-- GEMINI_API_KEY=tu_clave_aqui (motor CLOUD)
-- OLLAMA_BASE_URL=http://127.0.0.1:11434 y OLLAMA_MODEL=dolphin3 (motor LOCAL, sin censura)
+
+- `GEMINI_API_KEY=tu_clave_aqui` (motor CLOUD)
+- `OLLAMA_BASE_URL=http://127.0.0.1:11434` y `OLLAMA_MODEL=dolphin3` (motor LOCAL, sin censura)
 
 Despliega la plataforma (start_aegis.bat en Windows, o start_aegis.sh en Linux/macOS). El sistema se levantará en el puerto táctico TCP/1337 (frontend), con el AI Gateway detrás en el puerto 4000 durante desarrollo.
 
@@ -129,10 +134,12 @@ SI OLVIDAS LA PASSPHRASE no hay recuperación posible (es cifrado real, no un tr
 
 DESACTIVAR: vuelve al panel OPSEC y pulsa "DESACTIVAR CIFRADO" — tus datos actuales se vuelven a guardar en texto plano.
 
-4. EL ARSENAL TÁCTICO
+## 4. EL ARSENAL TÁCTICO
+
 AEGIS Red Horizon cubre **62 módulos de IA especializados** en 11 categorías, cada uno con un system prompt propio calibrado a esa herramienta o metodología específica. Esto es lo que hace cada uno:
 
 🎓 Metodología & Playbooks (11) — guías end-to-end fase por fase, confirmando en qué etapa estás antes de avanzar; la misma disciplina que evalúan las certificaciones, no solo comandos sueltos:
+
 - AD Attack Path — cadena completa de compromiso de Active Directory: recon no autenticado → BloodHound → Kerberoasting/AS-REP Roasting → movimiento lateral (PtH/PtT) → DCSync. (OSCP · CRTP · CRTE)
 - Pivoting & Tunneling — SSH, Chisel, Ligolo-ng, sshuttle, proxychains y doble/triple pivote entre redes segmentadas. (OSCP · CRTO)
 - Web & API Methodology — recon → auth/sesión → inyección → OWASP API Top 10 → lógica de negocio, mapeado a CVSS. (OSWE · eWPT · CPTS · BSCP)
@@ -146,6 +153,7 @@ AEGIS Red Horizon cubre **62 módulos de IA especializados** en 11 categorías, 
 - Redacción de Informes — estructura de reporte grado examen: resumen ejecutivo, CVSS, pasos de reproducción, remediación. (OSCP · CREST · CPTS)
 
 🕵️ Inteligencia & OSINT (6):
+
 - theHarvester — correos, subdominios y nombres de empleados desde fuentes públicas (motores de búsqueda, PGP, Shodan, crt.sh).
 - Sherlock — búsqueda de un username a través de cientos de redes sociales y plataformas.
 - Maltego — transforms y grafos de relación para correlacionar entidades (personas, dominios, infraestructura).
@@ -154,6 +162,7 @@ AEGIS Red Horizon cubre **62 módulos de IA especializados** en 11 categorías, 
 - Doxing & Leaks — búsqueda segura en HaveIBeenPwned/DeHashed y análisis de bases de datos filtradas.
 
 🎯 Recon & Bug Bounty (7):
+
 - Netdiscover / ARP-Scan — descubrimiento de hosts vivos en la red **antes** de escanear puertos (ARP pasivo vs. sweeps ICMP/TCP).
 - Nmap — escaneo de puertos y servicios, scripts NSE, evasión de firewalls, análisis de output XML/grepable.
 - Masscan — escaneo asíncrono de altísima velocidad para subredes grandes.
@@ -163,14 +172,17 @@ AEGIS Red Horizon cubre **62 módulos de IA especializados** en 11 categorías, 
 - Nessus / OpenVAS — escaneo autenticado de infraestructura y priorización de hallazgos críticos.
 
 ☁️ Cloud Security (2):
+
 - AWS Pacu — enumeración de S3, privesc de IAM, abuso de Lambda y metadata de EC2.
 - AzureHound — enumeración de Azure AD, Service Principals y bypass de Conditional Access.
 
 📱 Mobile Hacking (2):
+
 - MobSF — análisis estático: decompilación, revisión de manifest, secretos hardcodeados.
 - Frida / Objection — hooking en runtime, bypass de SSL pinning y de detección de root/jailbreak.
 
 🛠️ Desarrollo de Recursos & C2 (7):
+
 - Cobalt Strike — perfiles Malleable C2, generación de Beacons, movimiento lateral (psexec/wmi).
 - Sliver C2 — implantes multi-protocolo (mTLS/DNS/WireGuard) y post-explotación.
 - Havoc C2 — framework moderno con payloads Demon, sleep obfuscation e indirect syscalls.
@@ -180,6 +192,7 @@ AEGIS Red Horizon cubre **62 módulos de IA especializados** en 11 categorías, 
 - GoPhish — campañas de phishing, clonado de landing pages y tracking.
 
 🌐 Ataques Web (8):
+
 - Burp / Caido — interceptación de tráfico, Repeater, Intruder, manipulación de WebSockets.
 - WhatWeb / cURL / Wget — fingerprinting de servidores, extracción de headers, descarga de código fuente.
 - Nikto — escaneo de software desactualizado y vulnerabilidades CGI en servidores web.
@@ -190,6 +203,7 @@ AEGIS Red Horizon cubre **62 módulos de IA especializados** en 11 categorías, 
 - OWASP ZAP — escaneo automatizado, scans autenticados y fuzzing de APIs.
 
 🔓 Acceso Inicial (8):
+
 - Metasploit Framework — exploits, payloads, gestión de sesiones y pivoting.
 - Evil-WinRM — shell de Windows Remote Management con credenciales válidas o pass-the-hash.
 - Responder — envenenamiento LLMNR/NBT-NS para capturar hashes NTLMv2 en la red local.
@@ -200,6 +214,7 @@ AEGIS Red Horizon cubre **62 módulos de IA especializados** en 11 categorías, 
 - Aircrack-ng — suite manual clásica de auditoría WiFi (captura, inyección, cracking).
 
 🚩 Post-Explotación (6):
+
 - LinPEAS / WinPEAS — triage automatizado de vectores de escalada de privilegios.
 - Bloodhound / Impacket — mapeo de rutas de ataque en Active Directory y ejecución remota (psexec/wmiexec).
 - Rubeus — ejecución práctica del abuso de Kerberos: roasting, Pass-the-Ticket, Golden/Silver Ticket.
@@ -208,12 +223,14 @@ AEGIS Red Horizon cubre **62 módulos de IA especializados** en 11 categorías, 
 - Persistencia — backdoors, tareas programadas y mecanismos de persistencia post-compromiso.
 
 🔍 Forense & DFIR (4):
+
 - Autopsy — análisis de artefactos de disco y timeline forense.
 - Volatility 3 — análisis de memoria RAM (procesos, inyecciones, credenciales en memoria).
 - Wireshark — análisis de PCAP, descifrado de TLS, detección de beaconing C2.
 - Ghidra — ingeniería inversa de binarios y análisis estático de malware antes de cualquier detonación dinámica.
 
 📊 Reporting (1):
+
 - Report Builder — el generador de informes accesible desde cualquier terminal (ver Fase 4).
 
 *Fin del documento. Operar con precaución.*
