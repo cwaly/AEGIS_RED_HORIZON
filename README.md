@@ -131,20 +131,31 @@ AEGIS Red Horizon corre sobre un **AI Gateway** propio (backend Express) que pue
 ### Opción A: Docker (Recomendada 🐳)
 La forma más limpia y profesional.
 
-1. **Construir imagen:**
+**Con `docker compose` (recomendado):**
+
 ```bash
-   docker build -t aegis-red-horizon .
+docker compose up -d --build      # levantar / reconstruir tras un git pull
+docker compose logs -f            # ver logs
+docker compose down               # parar y borrar el contenedor
+```
 
-2. Ejecutar contenedor:
-    docker run -d --name aegis-red-horizon --restart unless-stopped -p 1337:1337 --env-file .env -e OLLAMA_BASE_URL=http://host.docker.internal:11434 aegis-red-horizon
+El `docker-compose.yml` lee `AEGIS_PORT` de tu `.env` y lo aplica a la vez al
+contenedor y al host, así que el puerto nunca se descuadra. Acceso: `http://localhost:<AEGIS_PORT>` (1337 por defecto).
 
-    ⚠️ Si usas el motor LOCAL (Ollama corriendo en tu máquina, fuera del contenedor), necesitas el `-e OLLAMA_BASE_URL=...` de arriba: dentro del contenedor `127.0.0.1` apunta al propio contenedor, no a tu host. En Linux nativo (no Docker Desktop) puede que además necesites `--add-host=host.docker.internal:host-gateway`. Si solo usarás el motor CLOUD (Gemini), puedes omitir esa variable.
+**Manual (sin compose):**
 
-    ⚠️ `--restart unless-stopped` hace que el contenedor se reinicie solo si Docker Desktop/WSL2 lo mata en segundo plano (código de salida 137, común tras suspender la máquina o reiniciar Docker Desktop) — evita tener que levantarlo a mano cada vez.
+```bash
+docker build -t aegis-red-horizon .
+docker run -d --name aegis-red-horizon --restart unless-stopped \
+  --env-file .env -p 1337:1337 \
+  -e OLLAMA_BASE_URL=http://host.docker.internal:11434 \
+  aegis-red-horizon
+```
 
-    ⚠️ **Puerto reservado por el SO.** Si el `docker run` falla al publicar el puerto (o en local ves `listen EACCES: permission denied 0.0.0.0:1337`), es que Windows tiene el 1337 en un rango reservado por Hyper-V/WSL2/Docker (`netsh int ipv4 show excludedportrange protocol=tcp`). Usa otro puerto: `-e AEGIS_PORT=3000 -p 3000:3000 ...` (y entra a `http://localhost:3000`).
-
-3. Acceso: Entra en tu navegador a http://localhost:1337
+- ⚠️ **El `-p` NO se puede cambiar sin recrear el contenedor.** Si ya existe uno con otro puerto: `docker rm -f aegis-red-horizon` y vuelve a lanzarlo. El botón ▶ de Docker Desktop reusa el `-p` con el que se creó — no lo cambies desde ahí.
+- ⚠️ **Puerto reservado por el SO.** Si en local ves `listen EACCES: permission denied 0.0.0.0:1337`, o el contenedor sale con `Exited (137)` nada más arrancar, es que el SO tiene el 1337 en un rango reservado por Hyper-V/WSL2/Docker (`netsh int ipv4 show excludedportrange protocol=tcp`). Pon `AEGIS_PORT=3000` en `.env`; con compose no hace falta nada más, en modo manual cambia también `-p 3000:3000`.
+- ⚠️ Motor LOCAL (Ollama en tu máquina): el `-e OLLAMA_BASE_URL=...` es necesario porque dentro del contenedor `127.0.0.1` es el propio contenedor. Con compose ya va incluido. Si solo usas CLOUD (Gemini) puedes omitirlo.
+- ⚠️ `--restart unless-stopped` relanza el contenedor si Docker Desktop/WSL2 lo mata en segundo plano (salida 137 tras suspender la máquina o reiniciar Docker).
 
 Opción B: Ejecución Local Automatizada (Windows / Linux)
 El proyecto incluye scripts de inicialización que instalan las dependencias (si es la primera vez), levantan el servidor y 

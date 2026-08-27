@@ -1,0 +1,30 @@
+# AEGIS: Red Horizon — despliegue en contenedor
+#
+#   docker compose up -d --build      # levantar (reconstruye si cambió el código)
+#   docker compose down               # parar y borrar el contenedor
+#   docker compose logs -f            # ver logs
+#
+# El puerto sale de AEGIS_PORT en .env (default 1337) y se aplica A LA VEZ al
+# contenedor y al host, así que nunca se descuadran. Si tu SO tiene el 1337
+# reservado (típico en Windows con Hyper-V/WSL2/Docker: te da
+# "listen EACCES ... 0.0.0.0:1337"), pon `AEGIS_PORT=3000` en .env y vuelve a
+# lanzar `docker compose up -d`.
+services:
+  aegis-red-horizon:
+    build: .
+    image: aegis-red-horizon:latest
+    container_name: aegis-red-horizon
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      # Si AEGIS_PORT no está en .env, cae a 1337 (mismo default que el resto).
+      AEGIS_PORT: ${AEGIS_PORT:-1337}
+      # Ollama corriendo en el host, fuera del contenedor. Sobreescribible en .env.
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+    ports:
+      - "${AEGIS_PORT:-1337}:${AEGIS_PORT:-1337}"
+    # Necesario en Linux nativo para que host.docker.internal resuelva al host.
+    # En Docker Desktop (Win/Mac) es inofensivo.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
